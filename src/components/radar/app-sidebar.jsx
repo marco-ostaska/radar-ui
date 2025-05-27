@@ -58,7 +58,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="bg-slate-300 px-4 py-2 font-bold text-lg">
-        Radar Ativos{" "}
+        <Link to="/">Radar Ativos</Link>
       </SidebarHeader>
       <SidebarContent className="h-screen bg-slate-200">
         {groups.map(({ id, icon: Icon, title, items }) => (
