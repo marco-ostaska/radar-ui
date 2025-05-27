@@ -48,8 +48,8 @@ const groups = [
     icon: Settings,
     title: "Admin",
     items: [
-      { id: "add", title: "Adicionar Ativos", href: "#" },
-      { id: "remove", title: "Remover Ativos", href: "#" },
+      { id: "add", title: "Adicionar Ativos", href: "/admin/add" },
+      { id: "remove", title: "Remover Ativos", href: "/admin/remove" },
     ],
   },
 ];
