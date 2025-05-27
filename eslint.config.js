@@ -13,7 +13,7 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
-        sourceType: 'module',
+           sourceType: 'module',
       },
     },
     plugins: {

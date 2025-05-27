@@ -20,7 +20,7 @@ const groups = [
     icon: Radar,
     title: "Radar",
     items: [
-      { id: "fii", title: "FII", href: "#" },
+      { id: "fii", title: "FII", href: "/radar/fii" },
       { id: "acoes", title: "Ações", href: "#" },
     ],
   },
