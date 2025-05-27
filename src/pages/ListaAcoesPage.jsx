@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Table, TableBody, TableRow, TableCell } from "@/components/ui/table";
+import { listarAtivosPorCategoria } from "@/api/adm/listarAtivosPorCategoria";
 
 function ListaTable({ ativos }) {
   return (
@@ -19,10 +20,9 @@ export default function ListaAcoesPage() {
   const [ativos, setAtivos] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/indicadores/admin/listar?tipo=acoes`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAtivos(data.tickers || []);
+    listarAtivosPorCategoria("acoes")
+      .then((tickers) => {
+        setAtivos(tickers);
       })
       .catch((err) => console.error("Erro ao buscar ativos:", err));
   }, []);

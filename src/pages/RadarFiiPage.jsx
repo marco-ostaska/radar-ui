@@ -1,151 +1,286 @@
-import { useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
   flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const data = [
   {
-    ativo: "HGBS11",
-    cotacao: 19.97,
-    valorPatrimonial: 221.79,
-    valorTeto: 70.07,
-    dy: 38.46,
-    rendimentoReal: 32.62,
-    potencial: 250.89,
-    notaRisco: 7.5,
-    score: 9.1,
+    id: "m5gr84i9",
+    amount: 316,
+    status: "success",
+    email: "ken99@example.com",
   },
   {
-    ativo: "HSML11",
-    cotacao: 84.77,
-    valorPatrimonial: 108.68,
-    valorTeto: 71.17,
-    dy: 9.2,
-    rendimentoReal: 3.36,
-    potencial: -16.05,
-    notaRisco: 6.7,
-    score: 2.7,
+    id: "3u1reuv4",
+    amount: 242,
+    status: "success",
+    email: "Abe45@example.com",
   },
-  // outros dados...
+  {
+    id: "derv1ws0",
+    amount: 837,
+    status: "processing",
+    email: "Monserrat44@example.com",
+  },
+  {
+    id: "5kma53ae",
+    amount: 874,
+    status: "success",
+    email: "Silas22@example.com",
+  },
+  {
+    id: "bhqecj4p",
+    amount: 721,
+    status: "failed",
+    email: "carmella@example.com",
+  },
 ];
 
 const columns = [
   {
-    accessorKey: "ativo",
-    header: "Ativo",
-    cell: info => info.getValue(),
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
   },
   {
-    accessorKey: "cotacao",
-    header: "Cotação",
-    cell: info => `R$ ${info.getValue().toFixed(2)}`,
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("status")}</div>
+    ),
   },
   {
-    accessorKey: "valorPatrimonial",
-    header: "Valor Patrimonial",
-    cell: info => info.getValue().toFixed(2),
+    accessorKey: "email",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Email
+        <ArrowUpDown />
+      </Button>
+    ),
+    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "valorTeto",
-    header: "Valor Teto por DY",
-    cell: info => info.getValue().toFixed(2),
+    accessorKey: "amount",
+    header: () => <div className="text-right">Amount</div>,
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("amount"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="text-right font-medium">{formatted}</div>;
+    },
   },
   {
-    accessorKey: "dy",
-    header: "DY",
-    cell: info => `${info.getValue().toFixed(2)}%`,
-  },
-  {
-    accessorKey: "rendimentoReal",
-    header: "Rendimento Real",
-    cell: info => `${info.getValue().toFixed(2)}%`,
-  },
-  {
-    accessorKey: "potencial",
-    header: "Potencial",
-    cell: info => `${info.getValue().toFixed(2)}%`,
-  },
-  {
-    accessorKey: "notaRisco",
-    header: "Nota Risco",
-    cell: info => info.getValue().toFixed(1),
-  },
-  {
-    accessorKey: "score",
-    header: "Score",
-    cell: info => info.getValue().toFixed(1),
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const payment = row.original;
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(payment.id)}
+            >
+              Copy payment ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View customer</DropdownMenuItem>
+            <DropdownMenuItem>View payment details</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
 
-function FiiRadarTable() {
+export default function RadarFii() {
   const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting },
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
   });
 
-  function getBgClass(columnId, value) {
-    if (columnId === "notaRisco" || columnId === "score") {
-      return value >= 6 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
-    }
-    return value >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
-  }
-
   return (
-<table className="table-auto border-separate border-spacing-0 border border-gray-300 w-full text-center">
-  <thead>
-    {table.getHeaderGroups().map(headerGroup => (
-      <tr key={headerGroup.id}>
-        {headerGroup.headers.map(header => (
-          <th
-            key={header.id}
-            onClick={header.column.getToggleSortingHandler()}
-            className="cursor-pointer border-b border-gray-300 p-2 select-none"
+    <div className="w-full">
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter emails..."
+          value={table.getColumn("email")?.getFilterValue() ?? ""}
+          onChange={(e) =>
+            table.getColumn("email")?.setFilterValue(e.target.value)
+          }
+          className="max-w-sm"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
           >
-            {flexRender(header.column.columnDef.header, header.getContext())}
-            {{
-              asc: " 🔼",
-              desc: " 🔽",
-            }[header.column.getIsSorted()] ?? null}
-          </th>
-        ))}
-      </tr>
-    ))}
-  </thead>
-
-  <tbody>
-    {table.getRowModel().rows.map(row => (
-      <tr key={row.id} className="hover:bg-gray-100">
-        {row.getVisibleCells().map(cell => {
-          const bgClass = getBgClass(cell.column.id, cell.getValue());
-          return (
-            <td key={cell.id} className={`border-b border-gray-300 p-2 ${bgClass}`}>
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </td>
-          );
-        })}
-      </tr>
-    ))}
-  </tbody>
-</table>
-
-  );
-}
-
-export default function FiiRadarPage() {
-  return (
-    <div className="max-w-8xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Radar de FIIs</h1>
-      <h2 className="text-lg mb-2">Shopping</h2>
-      <FiiRadarTable />
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

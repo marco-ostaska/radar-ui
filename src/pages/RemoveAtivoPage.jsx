@@ -18,38 +18,42 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-const categorias = [
-  "acoes",
-  "fiagro",
-  "hibrido",
-  "infra",
-  "logistica",
-  "papel",
-  "shopping",
-];
+import { listarCategorias } from "@/api/adm/listarCategorias";
+import { listarAtivosPorCategoria } from "@/api/adm/listarAtivosPorCategoria";
+import { removerAtivo } from "@/api/adm/removeAtivo";
 
 export default function RemoveAtivoPage() {
   const { handleSubmit, setValue, watch, register } = useForm({
     defaultValues: {
-      categoria: categorias[0],
+      categoria: "", // Inicial vazio até carregar
       ativo: "none",
     },
   });
 
   const categoriaSelecionada = watch("categoria");
   const ativoSelecionado = watch("ativo");
+
+  const [categorias, setCategorias] = useState([]);
   const [ativos, setAtivos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Carregar categorias
+  useEffect(() => {
+    listarCategorias()
+      .then((cats) => {
+        setCategorias(cats);
+        if (cats.length > 0) setValue("categoria", cats[0]);
+      })
+      .catch((err) => console.error("Erro ao buscar categorias:", err));
+  }, [setValue]);
+
+  // Carregar ativos ao mudar categoria
   useEffect(() => {
     if (!categoriaSelecionada) return;
 
-    fetch(
-      `http://localhost:8000/indicadores/admin/listar?tipo=${categoriaSelecionada}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setAtivos(data.tickers || []);
+    listarAtivosPorCategoria(categoriaSelecionada)
+      .then((tickers) => {
+        setAtivos(tickers);
         setValue("ativo", "none");
         setSearchTerm("");
       })
@@ -60,19 +64,17 @@ export default function RemoveAtivoPage() {
     ativo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Mutação para remover ativo usando a função removerAtivo
   const mutation = useMutation({
-    mutationFn: ({ categoria, ativo }) =>
-      fetch(
-        `http://localhost:8000/indicadores/admin/remover?tipo=${categoria}&ticker=${ativo.toUpperCase()}`,
-        { method: "DELETE" }
-      ).then(async (res) => {
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.detail || "Erro ao remover ativo");
-        return json;
-      }),
+    mutationFn: ({ categoria, ativo }) => removerAtivo(categoria, ativo),
     onSuccess: (data) => {
       alert(data.message || "Ativo removido com sucesso");
-      // aqui pode chamar uma função para refazer fetch e atualizar a lista, se desejar
+      // Recarregue a lista de ativos após remoção
+      listarAtivosPorCategoria(categoriaSelecionada).then((tickers) => {
+        setAtivos(tickers);
+        setValue("ativo", "none");
+        setSearchTerm("");
+      });
     },
     onError: (error) => {
       alert(error.message);
@@ -80,7 +82,10 @@ export default function RemoveAtivoPage() {
   });
 
   function onSubmit(data) {
-    mutation.mutate(data);
+    mutation.mutate({
+      categoria: data.categoria,
+      ativo: data.ativo.toUpperCase(),
+    });
   }
 
   return (
@@ -100,7 +105,7 @@ export default function RemoveAtivoPage() {
                   setValue("categoria", value);
                   setSearchTerm("");
                 }}
-                defaultValue={categorias[0]}
+                defaultValue=""
               >
                 <SelectTrigger id="categoria">
                   <SelectValue placeholder="Selecione a categoria" />
@@ -136,23 +141,31 @@ export default function RemoveAtivoPage() {
                     <SelectValue placeholder="Selecione o ativo" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-100">
-                    {filteredAtivos.length === 0 && (
+                    {filteredAtivos.length === 0 ? (
                       <SelectItem value="none" disabled>
                         Nenhum ativo disponível
                       </SelectItem>
+                    ) : (
+                      filteredAtivos.map((ativo) => (
+                        <SelectItem value={ativo} key={ativo}>
+                          {ativo}
+                        </SelectItem>
+                      ))
                     )}
-                    {filteredAtivos.map((ativo) => (
-                      <SelectItem value={ativo} key={ativo}>
-                        {ativo}
-                      </SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <CardFooter className="flex justify-end mt-4">
-              <Button type="submit" disabled={ativoSelecionado === "none" || mutation.isLoading}>
+              <Button
+                type="submit"
+                disabled={
+                  ativoSelecionado === "none" ||
+                  mutation.isLoading ||
+                  !categoriaSelecionada
+                }
+              >
                 {mutation.isLoading ? "Removendo..." : "Remover"}
               </Button>
             </CardFooter>
