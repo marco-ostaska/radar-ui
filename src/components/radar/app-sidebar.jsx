@@ -1,4 +1,4 @@
-import { ChevronRight, Radar, Wallet, Settings } from "lucide-react";
+import { ChevronRight, Radar, Wallet, Settings, List } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -12,7 +12,11 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 const groups = [
   {
@@ -31,6 +35,15 @@ const groups = [
     items: [{ id: "tbd", title: "TBD", href: "#" }],
   },
   {
+    id: "Lista",
+    icon: List,
+    title: "Lista",
+    items: [
+      { id: "fiis", title: "fii", href: "lista/fiis" },
+      { id: "acoes", title: "ações", href: "lista/acoes" },
+    ],
+  },
+  {
     id: "admin",
     icon: Settings,
     title: "Admin",
@@ -44,13 +57,15 @@ const groups = [
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader className="bg-slate-300 px-4 py-2 font-bold text-lg">Radar Ativos </SidebarHeader>
+      <SidebarHeader className="bg-slate-300 px-4 py-2 font-bold text-lg">
+        Radar Ativos{" "}
+      </SidebarHeader>
       <SidebarContent className="h-screen bg-slate-200">
         {groups.map(({ id, icon: Icon, title, items }) => (
           <SidebarGroup key={id}>
             <SidebarGroupContent>
               <SidebarMenu>
-                <Collapsible defaultOpen={false}  className="group" key={id}>
+                <Collapsible defaultOpen={false} className="group" key={id}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton>
