@@ -1,36 +1,33 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { fetchIndices } from "@/api/indices/atualiza";
 
 export default function Badges() {
   const [indices, setIndices] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [forceUpdate, setForceUpdate] = useState(false);
 
-  function fetchIndices(force = false) {
-    setLoading(true);
-    fetch(`http://localhost:8000/indices/atualiza?force=${force}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setIndices({
-          Selic: `${data.selic_atual ?? data.selic}%`,
-          "Selic 5 Anos": `${data.selic ?? "N/A"}%`,
-          IPCA: `${data.ipca_atual ?? data.ipca}%`,
-          "IPCA 5 Anos": `${data.ipca_media5 ?? "N/A"}%`,
-        });
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Erro ao buscar índices:", err);
-        setLoading(false);
-      });
-  }
-
   useEffect(() => {
-    fetchIndices(forceUpdate);
+    setLoading(true);
+    setError(null);
+    fetchIndices(forceUpdate)
+      .then(setIndices)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [forceUpdate]);
 
   if (loading) return <p>Carregando índices...</p>;
+  if (error)
+    return (
+      <div className="text-red-600 p-4 text-center">
+        Erro ao carregar índices: {error}
+        <Button onClick={() => setForceUpdate((old) => !old)}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
   if (!indices) return <p>Não foi possível carregar os índices.</p>;
 
   return (
@@ -53,9 +50,8 @@ export default function Badges() {
             {key}: {value}
           </Badge>
         ))}
-
         <Button variant="outline" onClick={() => setForceUpdate((old) => !old)}>
-          Atualizar Indices
+          Atualizar Índices
         </Button>
       </div>
     </header>
