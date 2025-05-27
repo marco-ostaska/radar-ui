@@ -17,7 +17,7 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
-
+import { Link } from "react-router-dom";
 const groups = [
   {
     id: "radar",
@@ -79,7 +79,7 @@ export function AppSidebar() {
                         {items.map(({ id: itemId, title: itemTitle, href }) => (
                           <SidebarMenuSubItem key={itemId}>
                             <SidebarMenuButton asChild>
-                              <a href={href}>{itemTitle}</a>
+                              <Link to={href}>{itemTitle}</Link>
                             </SidebarMenuButton>
                           </SidebarMenuSubItem>
                         ))}
