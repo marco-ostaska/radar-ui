@@ -25,7 +25,7 @@ const groups = [
     title: "Radar",
     items: [
       { id: "fii", title: "FII", href: "/radar/fii" },
-      { id: "acoes", title: "Ações", href: "#" },
+      { id: "acoes", title: "Ações", href: "/radar/acoes" },
     ],
   },
   {
