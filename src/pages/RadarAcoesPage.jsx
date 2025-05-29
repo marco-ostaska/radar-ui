@@ -260,7 +260,7 @@ export default function RadarAcoes() {
       <div className="flex items-center justify-between py-4">
         <div>
           totalAtivosCarregados {data.length} de {totalAtivos} ativos.
-          <Progress value={(data.length / 60) * 100} />
+          <Progress value={(data.length / totalAtivos) * 100} />
         </div>
         <Input
           placeholder="Filtrar Ativo"

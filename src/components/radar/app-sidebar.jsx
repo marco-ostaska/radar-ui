@@ -40,7 +40,10 @@ const groups = [
     id: "compra",
     icon: BadgeDollarSign,
     title: "Compra",
-    items: [{ id: "acoes-dia", title: "Ações", href: "/radar/acoes/dia" }],
+    items: [
+      { id: "acoes-dia", title: "Ações", href: "/radar/acoes/dia" },
+      { id: "fiis-dia", title: "FIIs", href: "/radar/fii/dia" },
+    ],
   },
   {
     id: "Lista",

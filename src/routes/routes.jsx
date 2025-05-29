@@ -8,6 +8,7 @@ import RemoveAtivoPage from "@/pages/RemoveAtivoPage";
 import RadarAcoes from "@/pages/RadarAcoesPage";
 import RadarAcoesDia from "@/pages/RadarAcoesDia";
 import RadarFiisPage from "@/pages/RadarFiisPage";
+import RadarFIIsDia from "@/pages/RadarFIIsDia";
 // import RadarAcoesPage from "@/pages/RadarAcoesP";
 
 export const router = createBrowserRouter([
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "admin/remove", element: <RemoveAtivoPage /> },
       { path: "radar/acoes", element: <RadarAcoes /> },
       { path: "radar/acoes/dia", element: <RadarAcoesDia /> },
+      { path: "radar/fii/dia", element: <RadarFIIsDia /> },
 
       // { path: "radar/acoes", element: <RadarAcoesPage /> },
     ],

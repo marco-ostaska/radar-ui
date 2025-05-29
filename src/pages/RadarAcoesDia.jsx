@@ -241,10 +241,15 @@ export default function RadarAcoesDia() {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        <div>
-          Procurando ativos {((data.length / totalAtivos) * 100).toFixed(2)} %.
-          <Progress value={(data.length / totalAtivos) * 100} />
-        </div>
+        {data.length < totalAtivos && (
+          <div>
+            Procurando Açõe para Compra:{" "}
+            {((data.length / totalAtivos) * 100).toFixed(2)}% ...... [
+            {data.length}/{totalAtivos}]
+            <Progress value={(data.length / totalAtivos) * 100} />
+          </div>
+        )}
+
         <Input
           placeholder="Filtrar Ativo"
           value={table.getColumn("ticker")?.getFilterValue() ?? ""}
