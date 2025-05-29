@@ -1,12 +1,13 @@
 import App from "@/App";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import RadarFiiPage from "@/pages/RadarAcoesDia";
+
 import ListaFiisPage from "@/pages/ListaFiisPage";
 import ListaAcoesPage from "@/pages/ListaAcoesPage";
 import AddAtivoPage from "@/pages/AddAtivoPage";
 import RemoveAtivoPage from "@/pages/RemoveAtivoPage";
 import RadarAcoes from "@/pages/RadarAcoesPage";
 import RadarAcoesDia from "@/pages/RadarAcoesDia";
+import RadarFiisPage from "@/pages/RadarFiisPage";
 // import RadarAcoesPage from "@/pages/RadarAcoesP";
 
 export const router = createBrowserRouter([
@@ -14,7 +15,7 @@ export const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { path: "radar/fii", element: <RadarFiiPage /> },
+      { path: "radar/fii", element: <RadarFiisPage /> },
       { path: "lista/fiis", element: <ListaFiisPage /> },
       { path: "lista/acoes", element: <ListaAcoesPage /> },
       { path: "admin/add", element: <AddAtivoPage /> },
