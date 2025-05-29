@@ -47,7 +47,7 @@ export default function Badges() {
       <div className="flex justify-center items-center space-x-8">
         {Object.entries(indices).map(([key, value]) => (
           <Badge key={key} variant="outline">
-            {key}: {value}
+            {key}: {value.toFixed(2)}%
           </Badge>
         ))}
         <Button variant="outline" onClick={() => setForceUpdate((old) => !old)}>

@@ -1,5 +1,3 @@
-// RadarAcoes.jsx
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
@@ -29,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { listarAtivosPorCategoria } from "@/api/adm/listarAtivosPorCategoria";
 import { fetchRadarAcao } from "@/api/acoes/radar";
+import { fetchIndices } from "@/api/indices/atualiza";
 
 function setTextColor(atributo, valor) {
   const numAtributo = Number(atributo);
@@ -41,11 +40,22 @@ function setTextColor(atributo, valor) {
 
 export default function RadarAcoes() {
   const [data, setData] = useState([]);
+  const [indices, setIndices] = useState({});
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [totalAtivos, setTotalAtivos] = useState(0);
   const hasFetched = useRef(false);
+
+  // Carregar os índices ao iniciar
+  useEffect(() => {
+    fetchIndices()
+      .then(setIndices)
+      .catch((err) => console.error("Erro ao buscar índices:", err));
+  }, []);
+
+  // Pega juros reais ou 0 se não carregado
+  const jurosReais = indices.juros_reais ?? 0;
 
   useEffect(() => {
     if (hasFetched.current) return;
@@ -126,7 +136,16 @@ export default function RadarAcoes() {
             DY <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
-        cell: ({ row }) => <div>{row.getValue("dy_estimado")}%</div>,
+        cell: ({ row }) => (
+          <div
+            className={`${setTextColor(
+              row.getValue("dy_estimado"),
+              jurosReais
+            )}`}
+          >
+            {row.getValue("dy_estimado")}%
+          </div>
+        ),
       },
       {
         accessorKey: "rendimento_real",
@@ -138,7 +157,13 @@ export default function RadarAcoes() {
             Rendimento Real <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
-        cell: ({ row }) => <div>{row.getValue("rendimento_real")}%</div>,
+        cell: ({ row }) => (
+          <div
+            className={`${setTextColor(row.getValue("rendimento_real"), 0)}`}
+          >
+            {row.getValue("rendimento_real")}%
+          </div>
+        ),
       },
       {
         accessorKey: "potencial",
@@ -150,13 +175,22 @@ export default function RadarAcoes() {
             Potencial <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
-        cell: ({ row }) => <div>{row.getValue("potencial")}%</div>,
+        cell: ({ row }) => (
+          <div className={`${setTextColor(row.getValue("potencial"), 0)}`}>
+            {row.getValue("potencial")}%
+          </div>
+        ),
       },
       {
         accessorKey: "earning_yield",
         header: "Earning Yield",
         cell: ({ row }) => (
-          <div className="flex justify-around">
+          <div
+            className={`${setTextColor(
+              row.getValue("earning_yield"),
+              jurosReais
+            )}`}
+          >
             {row.getValue("earning_yield")}%
           </div>
         ),
@@ -191,8 +225,20 @@ export default function RadarAcoes() {
           return <div className={`${setTextColor(score, 5)}`}>{score}</div>;
         },
       },
+      {
+        accessorKey: "comprar",
+        header: "Comprar",
+        cell: ({ row }) => {
+          const comprar = row.getValue("comprar");
+          return (
+            <div className={comprar ? "text-green-600" : "text-red-500"}>
+              {comprar ? "Sim" : "-"}
+            </div>
+          );
+        },
+      },
     ],
-    []
+    [jurosReais]
   );
 
   const table = useReactTable({
@@ -215,7 +261,6 @@ export default function RadarAcoes() {
         </div>
         <Input
           placeholder="Filtrar Ativo"
-          xt
           value={table.getColumn("ticker")?.getFilterValue() ?? ""}
           onChange={(e) =>
             table.getColumn("ticker")?.setFilterValue(e.target.value)

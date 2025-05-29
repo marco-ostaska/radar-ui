@@ -6,14 +6,17 @@ export async function fetchIndices(force = false) {
   );
   if (!res.ok) throw new Error("Erro ao buscar índices");
   const data = await res.json();
+  
   return {
-    Selic: `${data.selic_atual ?? data.selic}%`,
-    "Selic 5 Anos": `${data.selic ?? "N/A"}%`,
-    IPCA: `${data.ipca_atual ?? data.ipca}%`,
-    "IPCA 5 Anos": `${data.ipca_media5 ?? "N/A"}%`,
-    "Juros Reais": `${data.selic_atual - (data.ipca_atual ?? data.ipca)}%`,
-    "Spread Indices":
-      Math.max(Number(data.selic ?? 0), Number(data.ipca_media5 ?? 0)) + "%",
+    selic_atual: data.selic_atual ?? data.selic,
+    selic_5anos: data.selic ?? null,
+    ipca_atual: data.ipca_atual ?? data.ipca,
+    ipca_5anos: data.ipca_media5 ?? null,
+    juros_reais:
+      (data.selic_atual ?? data.selic) - (data.ipca_atual ?? data.ipca),
+    spread_indices: Math.max(
+      Number(data.selic ?? 0),
+      Number(data.ipca_media5 ?? 0)
+    ),
   };
 }
-
