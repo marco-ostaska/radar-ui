@@ -39,7 +39,7 @@ function setTextColor(atributo, valor) {
   return "text-red-700";
 }
 
-export default function RadarAcoes() {
+export default function RadarAcoesDia() {
   const [data, setData] = useState([]);
   const [indices, setIndices] = useState({});
   const [sorting, setSorting] = useState([]);
@@ -48,14 +48,12 @@ export default function RadarAcoes() {
   const [totalAtivos, setTotalAtivos] = useState(0);
   const hasFetched = useRef(false);
 
-  // Carregar os índices ao iniciar
   useEffect(() => {
     fetchIndices()
       .then(setIndices)
       .catch((err) => console.error("Erro ao buscar índices:", err));
   }, []);
 
-  // Pega juros reais ou 0 se não carregado
   const jurosReais = indices.juros_reais ?? 0;
 
   useEffect(() => {
@@ -122,7 +120,9 @@ export default function RadarAcoes() {
         cell: ({ row }) => {
           const tetoDY = row.getValue("valor_teto_por_dy");
           return (
-            <div className={`${setTextColor(tetoDY, row.getValue("cotacao"))}`}>
+            <div
+              className={`${setTextColor(tetoDY, row.getValue("cotacao"))}`}
+            >
               R$ {tetoDY}
             </div>
           );
@@ -130,14 +130,7 @@ export default function RadarAcoes() {
       },
       {
         accessorKey: "dy_estimado",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            DY <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
+        header: "DY Estimado",
         cell: ({ row }) => (
           <div
             className={`${setTextColor(
@@ -151,14 +144,7 @@ export default function RadarAcoes() {
       },
       {
         accessorKey: "rendimento_real",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Rendimento Real <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
+        header: "Rendimento Real",
         cell: ({ row }) => (
           <div
             className={`${setTextColor(row.getValue("rendimento_real"), 0)}`}
@@ -169,14 +155,7 @@ export default function RadarAcoes() {
       },
       {
         accessorKey: "potencial",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Potencial <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
+        header: "Potencial",
         cell: ({ row }) => (
           <div className={`${setTextColor(row.getValue("potencial"), 0)}`}>
             {row.getValue("potencial")}%
@@ -199,14 +178,7 @@ export default function RadarAcoes() {
       },
       {
         accessorKey: "nota_risco",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Nota Risco <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
+        header: "Nota Risco",
         cell: ({ row }) => {
           const nota = row.getValue("nota_risco");
           return <div className={`${setTextColor(nota, 5)}`}>{nota}</div>;
@@ -214,37 +186,48 @@ export default function RadarAcoes() {
       },
       {
         accessorKey: "score",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Score <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
+        header: "Score",
         cell: ({ row }) => {
           const score = row.getValue("score");
           return <div className={`${setTextColor(score, 5)}`}>{score}</div>;
         },
       },
-      {
-        accessorKey: "comprar",
-        header: "Comprar",
-        cell: ({ row }) => {
-          const comprar = row.getValue("comprar");
-          return (
-            <div className={comprar ? "text-green-600" : "text-red-500"}>
-              {comprar ? "Sim" : "-"}
-            </div>
-          );
-        },
+    {
+      id: "comprar", 
+      accessorFn: (row) => {
+        const talvez = row.cotacao > row.teto_por_lucro;
+        return talvez ? "Talvez" : "Sim";  
       },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Comprar <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue("comprar");
+        return (
+          <div
+            className={
+              value === "Sim" ? "text-green-600" : "text-yellow-600"
+            }
+          >
+            {value}
+          </div>
+        );
+      },
+      sortingFn: "alphanumeric",  
+    },
     ],
     [jurosReais]
   );
 
+  const filteredData = data.filter((ativo) => ativo.comprar);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: { sorting, columnFilters, columnVisibility },
     onSortingChange: setSorting,
@@ -259,8 +242,8 @@ export default function RadarAcoes() {
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
         <div>
-          totalAtivosCarregados {data.length} de {totalAtivos} ativos.
-          <Progress value={(data.length / 60) * 100} />
+          Procurando ativos {((data.length / totalAtivos) * 100).toFixed(2)} %.
+          <Progress value={(data.length / totalAtivos) * 100} />
         </div>
         <Input
           placeholder="Filtrar Ativo"
@@ -294,8 +277,8 @@ export default function RadarAcoes() {
         </DropdownMenu>
       </div>
       <div className="rounded-md border">
-        {data.length === 0 ? (
-          <div className="text-center p-4">Carregando dados...</div>
+        {filteredData.length === 0 ? (
+          <div className="text-center p-4">Sem ativos bons no momento.</div>
         ) : (
           <Table>
             <TableHeader>

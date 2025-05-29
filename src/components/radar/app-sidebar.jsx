@@ -1,4 +1,11 @@
-import { ChevronRight, Radar, Wallet, Settings, List } from "lucide-react";
+import {
+  ChevronRight,
+  Radar,
+  Wallet,
+  Settings,
+  List,
+  BadgeDollarSign,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -28,11 +35,12 @@ const groups = [
       { id: "acoes", title: "Ações", href: "/radar/acoes" },
     ],
   },
+
   {
-    id: "carteira",
-    icon: Wallet,
-    title: "Carteira",
-    items: [{ id: "tbd", title: "TBD", href: "#" }],
+    id: "compra",
+    icon: BadgeDollarSign,
+    title: "Compra",
+    items: [{ id: "acoes-dia", title: "Ações", href: "/radar/acoes/dia" }],
   },
   {
     id: "Lista",
