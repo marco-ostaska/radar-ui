@@ -1,6 +1,8 @@
+// RadarAcoes.jsx
+
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -25,10 +27,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { listarAtivosPorCategoria } from "@/api/adm/listarAtivosPorCategoria";
 import { fetchRadarAcao } from "@/api/acoes/radar";
-import pLimit from "p-limit"; // Importa o p-limit
 
 function setTextColor(atributo, valor) {
   const numAtributo = Number(atributo);
@@ -41,36 +41,28 @@ function setTextColor(atributo, valor) {
 
 export default function RadarAcoes() {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [totalAtivos, setTotalAtivos] = useState(0);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     async function fetchData() {
       try {
         const ativos = await listarAtivosPorCategoria("acoes");
         setTotalAtivos(ativos.length);
-
-        const limit = pLimit(4); // Limite de 4 chamadas simultâneas
-        const promessas = ativos.map((ativo) =>
-          limit(async () => {
-            try {
-              return await fetchRadarAcao(ativo);
-            } catch (error) {
-              console.error(`Erro ao buscar ${ativo}:`, error);
-              return null; // Para evitar Promise.all falhar
-            }
-          })
-        );
-
-        const resultados = await Promise.all(promessas);
-        setData(resultados.filter(Boolean));
+        for (let i = 0; i < ativos.length; i++) {
+          const ativo = ativos[i];
+          const resultado = await fetchRadarAcao(ativo);
+          setData((prev) => [...prev, resultado]);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
       } catch (error) {
-        console.error("Erro ao buscar lista de ativos:", error);
-      } finally {
-        setLoading(false);
+        console.error("Erro ao buscar dados do radar:", error);
       }
     }
 
@@ -94,7 +86,11 @@ export default function RadarAcoes() {
       {
         accessorKey: "cotacao",
         header: "Cotação",
-        cell: ({ row }) => <div>R$ {row.getValue("cotacao")?.toFixed(2)}</div>,
+        cell: ({ row }) => (
+          <div className="justify-center flex">
+            R$ {row.getValue("cotacao")?.toFixed(2)}
+          </div>
+        ),
       },
       {
         accessorKey: "teto_por_lucro",
@@ -103,12 +99,7 @@ export default function RadarAcoes() {
           const cotacao = row.getValue("cotacao");
           const teto = row.getValue("teto_por_lucro");
           return (
-            <div
-              className={`justify-center items-center flex ${setTextColor(
-                teto,
-                cotacao
-              )}`}
-            >
+            <div className={`${setTextColor(teto, cotacao)}`}>
               R$ {teto?.toFixed(2)}
             </div>
           );
@@ -121,14 +112,7 @@ export default function RadarAcoes() {
           const dy = row.getValue("dy_estimado");
           const tetoDY = row.getValue("valor_teto_por_dy");
           return (
-            <div
-              className={`justify-center items-center flex ${setTextColor(
-                tetoDY,
-                dy
-              )}`}
-            >
-              R$ {tetoDY}
-            </div>
+            <div className={`${setTextColor(tetoDY, dy)}`}>R$ {tetoDY}</div>
           );
         },
       },
@@ -171,7 +155,11 @@ export default function RadarAcoes() {
       {
         accessorKey: "earning_yield",
         header: "Earning Yield",
-        cell: ({ row }) => <div>{row.getValue("earning_yield")}%</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-around">
+            {row.getValue("earning_yield")}%
+          </div>
+        ),
       },
       {
         accessorKey: "nota_risco",
@@ -185,16 +173,7 @@ export default function RadarAcoes() {
         ),
         cell: ({ row }) => {
           const nota = row.getValue("nota_risco");
-          return (
-            <div
-              className={`justify-center items-center flex ${setTextColor(
-                nota,
-                5
-              )}`}
-            >
-              {nota}
-            </div>
-          );
+          return <div className={`${setTextColor(nota, 5)}`}>{nota}</div>;
         },
       },
       {
@@ -209,16 +188,7 @@ export default function RadarAcoes() {
         ),
         cell: ({ row }) => {
           const score = row.getValue("score");
-          return (
-            <div
-              className={`justify-center items-center flex ${setTextColor(
-                score,
-                5
-              )}`}
-            >
-              {score}
-            </div>
-          );
+          return <div className={`${setTextColor(score, 5)}`}>{score}</div>;
         },
       },
     ],
@@ -240,11 +210,12 @@ export default function RadarAcoes() {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        <div className="text-sm text-muted-foreground">
+        <div>
           Carregados {data.length} de {totalAtivos} ativos.
         </div>
         <Input
           placeholder="Filtrar Ativo"
+          xt
           value={table.getColumn("ticker")?.getFilterValue() ?? ""}
           onChange={(e) =>
             table.getColumn("ticker")?.setFilterValue(e.target.value)
@@ -275,15 +246,18 @@ export default function RadarAcoes() {
         </DropdownMenu>
       </div>
       <div className="rounded-md border">
-        {loading ? (
+        {data.length === 0 ? (
           <div className="text-center p-4">Carregando dados...</div>
         ) : (
-          <Table key={data.length}>
+          <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className="text-center align-middle"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -296,29 +270,21 @@ export default function RadarAcoes() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="text-center align-middle"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         )}

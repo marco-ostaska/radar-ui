@@ -11,12 +11,9 @@ export async function fetchIndices(force = false) {
     "Selic 5 Anos": `${data.selic ?? "N/A"}%`,
     IPCA: `${data.ipca_atual ?? data.ipca}%`,
     "IPCA 5 Anos": `${data.ipca_media5 ?? "N/A"}%`,
+    "Juros Reais": `${data.selic_atual - (data.ipca_atual ?? data.ipca)}%`,
+    "Spread Indices":
+      Math.max(Number(data.selic ?? 0), Number(data.ipca_media5 ?? 0)) + "%",
   };
 }
 
-export async function fetchMelhorIndice() {
-  const res = await fetch("http://localhost:8000/indices/melhor");
-  if (!res.ok) throw new Error("Erro ao buscar melhor índice");
-  const data = await res.json();
-  return data["melhor índice"];
-}
