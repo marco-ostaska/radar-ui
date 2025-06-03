@@ -234,7 +234,7 @@ export default function RadarFiisPage() {
 
         for (const ticker of ativos) {
           try {
-            const result = await fetchRadaFii(ticker, selectedCategory);
+            const result = await fetchRadaFii(ticker);
             setDataPorCategoria((prev) => ({
               ...prev,
               [selectedCategory]: [...(prev[selectedCategory] || []), result],

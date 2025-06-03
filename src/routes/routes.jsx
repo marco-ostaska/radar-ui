@@ -9,7 +9,8 @@ import RadarAcoes from "@/pages/RadarAcoesPage";
 import RadarAcoesDia from "@/pages/RadarAcoesDia";
 import RadarFiisPage from "@/pages/RadarFiisPage";
 import RadarFIIsDia from "@/pages/RadarFIIsDia";
-// import RadarAcoesPage from "@/pages/RadarAcoesP";
+import BuscaAcoesPage from "@/pages/BuscaAcoesPage";
+import BuscaFIIsPage from "@/pages/BuscaFIIsPage";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,8 @@ export const router = createBrowserRouter([
       { path: "radar/acoes", element: <RadarAcoes /> },
       { path: "radar/acoes/dia", element: <RadarAcoesDia /> },
       { path: "radar/fii/dia", element: <RadarFIIsDia /> },
+      { path: "busca/acoes/", element: <BuscaAcoesPage /> },
+      { path: "busca/fii/", element: <BuscaFIIsPage /> },
 
       // { path: "radar/acoes", element: <RadarAcoesPage /> },
     ],

@@ -66,7 +66,7 @@ export default function RadarFIIsDia() {
         }
         setTotalAtivos(ativos.length);
         for (const { ticker, cat } of ativos) {
-          const resultado = await fetchRadaFii(ticker, cat);
+          const resultado = await fetchRadaFii(ticker);
           setProcessados((prev) => prev + 1); // 👈 Incrementa processados
           if (resultado.comprar) {
             setData((prev) => [...prev, resultado]);

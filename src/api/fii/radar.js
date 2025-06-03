@@ -1,7 +1,9 @@
 //src/api/fii/radar.js
 
-export async function fetchRadaFii(ticker, tipo) {
-  const url = `http://localhost:8000/fii/radar?ticker=${encodeURIComponent(ticker)}&tipo=${encodeURIComponent(tipo)}`;
+export async function fetchRadaFii(ticker) {
+  const url = `http://localhost:8000/fii/radar?ticker=${encodeURIComponent(
+    ticker
+  )}`;
 
   const res = await fetch(url, {
     headers: {
@@ -11,7 +13,9 @@ export async function fetchRadaFii(ticker, tipo) {
 
   if (!res.ok) {
     const errorData = await res.json();
-    throw new Error(errorData.detail || errorData.message || "Erro ao buscar radar do FII");
+    throw new Error(
+      errorData.detail || errorData.message || "Erro ao buscar radar do FII"
+    );
   }
 
   const data = await res.json();
