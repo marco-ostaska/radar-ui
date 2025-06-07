@@ -5,6 +5,7 @@ import {
   Settings,
   List,
   BadgeDollarSign,
+  History,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,6 +62,7 @@ const groups = [
     title: "Carteira",
     items: [
       { id: "minha-carteira", title: "Minha Carteira", href: "/carteira" },
+      { id: "transacoes", title: "Transações", href: "/transacoes" },
     ],
   },
   {
@@ -132,6 +134,19 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  to="/carteira"
+                  icon={<Wallet className="h-4 w-4" />}
+                  label="Carteira"
+                />
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="bg-slate-300 px-4 py-4 text-sm">
         <div className="flex flex-col gap-3">

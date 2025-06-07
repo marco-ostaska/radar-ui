@@ -12,6 +12,7 @@ import RadarFIIsDia from "@/pages/RadarFIIsDia";
 import BuscaAcoesPage from "@/pages/BuscaAcoesPage";
 import BuscaFIIsPage from "@/pages/BuscaFIIsPage";
 import CarteiraPage from "@/pages/carteira";
+import TransacoesPage from "@/pages/transacoes";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: "busca/acoes/", element: <BuscaAcoesPage /> },
       { path: "busca/fii/", element: <BuscaFIIsPage /> },
       { path: "carteira", element: <CarteiraPage /> },
+      { path: "transacoes", element: <TransacoesPage /> },
 
       // { path: "radar/acoes", element: <RadarAcoesPage /> },
     ],
