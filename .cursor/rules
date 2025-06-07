@@ -1,0 +1,98 @@
+{
+  "editor": {
+    "formatOnSave": true,
+    "defaultFormatter": "esbenp.prettier-vscode",
+    "tabSize": 2,
+    "insertSpaces": true,
+    "detectIndentation": true,
+    "trimTrailingWhitespace": true,
+    "insertFinalNewline": true
+  },
+  "files": {
+    "associations": {
+      "*.jsx": "javascriptreact"
+    },
+    "exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.git": true
+    }
+  },
+  "javascript": {
+    "format": {
+      "semicolons": "remove",
+      "quotes": "single",
+      "trailingComma": "es5",
+      "bracketSpacing": true,
+      "arrowParens": "avoid"
+    },
+    "preferences": {
+      "importModuleSpecifier": "non-relative",
+      "quoteStyle": "single"
+    }
+  },
+  "tailwind": {
+    "classOrder": [
+      "container",
+      "position",
+      "display",
+      "flexbox",
+      "grid",
+      "spacing",
+      "sizing",
+      "typography",
+      "backgrounds",
+      "borders",
+      "effects",
+      "transitions",
+      "transforms",
+      "interactivity"
+    ]
+  },
+  "react": {
+    "componentNaming": {
+      "pattern": "PascalCase",
+      "suffix": ""
+    },
+    "hooks": {
+      "naming": "camelCase",
+      "prefix": "use"
+    }
+  },
+  "imports": {
+    "order": [
+      "^react",
+      "^@/",
+      "^[./]"
+    ],
+    "newlineBetweenGroups": true
+  },
+  "naming": {
+    "components": "PascalCase",
+    "hooks": "camelCase",
+    "utils": "camelCase",
+    "constants": "UPPER_SNAKE_CASE"
+  },
+  "guidelines": {
+    "earlyReturns": true,
+    "tailwindOnly": true,
+    "classConditionals": "class:",
+    "eventHandlers": {
+      "prefix": "handle",
+      "examples": {
+        "onClick": "handleClick",
+        "onKeyDown": "handleKeyDown",
+        "onSubmit": "handleSubmit"
+      }
+    },
+    "accessibility": {
+      "required": [
+        "tabindex",
+        "aria-label",
+        "onClick",
+        "onKeyDown"
+      ]
+    },
+    "functionStyle": "const arrow = () => {}"
+  }
+} 

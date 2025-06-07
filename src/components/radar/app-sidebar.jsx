@@ -56,6 +56,14 @@ const groups = [
     ],
   },
   {
+    id: "carteira",
+    icon: Wallet,
+    title: "Carteira",
+    items: [
+      { id: "minha-carteira", title: "Minha Carteira", href: "/carteira" },
+    ],
+  },
+  {
     id: "Lista",
     icon: List,
     title: "Lista",
