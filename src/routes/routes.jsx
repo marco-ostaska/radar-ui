@@ -11,6 +11,7 @@ import RadarFiisPage from "@/pages/RadarFiisPage";
 import RadarFIIsDia from "@/pages/RadarFIIsDia";
 import BuscaAcoesPage from "@/pages/BuscaAcoesPage";
 import BuscaFIIsPage from "@/pages/BuscaFIIsPage";
+import CarteiraPage from "@/pages/carteira";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "radar/fii/dia", element: <RadarFIIsDia /> },
       { path: "busca/acoes/", element: <BuscaAcoesPage /> },
       { path: "busca/fii/", element: <BuscaFIIsPage /> },
+      { path: "carteira", element: <CarteiraPage /> },
 
       // { path: "radar/acoes", element: <RadarAcoesPage /> },
     ],
