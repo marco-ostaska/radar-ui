@@ -12,87 +12,111 @@ import { fetchCarteira, fetchCarteiraFiis } from "@/api/carteira";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Plus } from "lucide-react";
+import {
+  adicionarTransacaoAcoes,
+  adicionarTransacaoFiis,
+} from "@/api/transacoes";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Carteira() {
   const [carteiraAcoes, setCarteiraAcoes] = useState([]);
   const [carteiraFiis, setCarteiraFiis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortConfig, setSortConfig] = useState({
-    key: null,
-    direction: "ascending",
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    ticker: "",
+    quantidade: "",
+    preco: "",
+    tipo: "COMPRA",
+    data: format(new Date(), "dd/MM/yyyy"),
+    ativoTipo: "acao",
   });
 
   useEffect(() => {
-    const loadCarteira = async () => {
-      try {
-        const [acoes, fiis] = await Promise.all([
-          fetchCarteira(),
-          fetchCarteiraFiis(),
-        ]);
-        setCarteiraAcoes(acoes);
-        setCarteiraFiis(fiis);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadCarteira();
   }, []);
 
-  const handleSort = (key) => {
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
+  const loadCarteira = async () => {
+    try {
+      setLoading(true);
+      const [acoes, fiis] = await Promise.all([
+        fetchCarteira(),
+        fetchCarteiraFiis(),
+      ]);
+      setCarteiraAcoes(acoes);
+      setCarteiraFiis(fiis);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    setSortConfig({ key, direction });
   };
 
-  const sortData = (data) => {
-    if (!sortConfig.key) return data;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    return [...data].sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+  const handleSelectChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-      if (sortConfig.key === "recomendacao") {
-        const recomendacaoOrder = {
-          "COMPRAR ou APORTAR": 0,
-          "MANTER com cautela": 1,
-          VENDER: 2,
-        };
-        return sortConfig.direction === "ascending"
-          ? recomendacaoOrder[aValue] - recomendacaoOrder[bValue]
-          : recomendacaoOrder[bValue] - recomendacaoOrder[aValue];
-      }
-
-      if (typeof aValue === "string") {
-        return sortConfig.direction === "ascending"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      return sortConfig.direction === "ascending"
-        ? aValue - bValue
-        : bValue - aValue;
+  const resetForm = () => {
+    setFormData({
+      ticker: "",
+      quantidade: "",
+      preco: "",
+      tipo: "COMPRA",
+      data: format(new Date(), "dd/MM/yyyy"),
+      ativoTipo: "acao",
     });
   };
 
-  if (loading) return <div className="p-4">Carregando carteira...</div>;
-  if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
-
-  const getRecomendacaoColor = (recomendacao) => {
-    switch (recomendacao) {
-      case "COMPRAR ou APORTAR":
-        return "bg-green-100 text-green-800";
-      case "MANTER com cautela":
-        return "bg-yellow-100 text-yellow-800";
-      case "VENDER":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (formData.ativoTipo === "acao") {
+        await adicionarTransacaoAcoes({
+          ...formData,
+          carteiraId: 1,
+        });
+      } else {
+        await adicionarTransacaoFiis({
+          ...formData,
+          carteiraId: 1,
+        });
+      }
+      setIsDialogOpen(false);
+      resetForm();
+      loadCarteira();
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -109,6 +133,22 @@ export default function Carteira() {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value / 100);
+  };
+
+  if (loading) return <div className="p-4">Carregando carteira...</div>;
+  if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
+
+  const getRecomendacaoColor = (recomendacao) => {
+    switch (recomendacao) {
+      case "COMPRAR ou APORTAR":
+        return "bg-green-100 text-green-800";
+      case "MANTER com cautela":
+        return "bg-yellow-100 text-yellow-800";
+      case "VENDER":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   const SortButton = ({ columnKey, children }) => (
@@ -149,7 +189,7 @@ export default function Carteira() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortData(carteiraAcoes).map((acao) => (
+          {carteiraAcoes.map((acao) => (
             <TableRow key={acao.ticker}>
               <TableCell className="font-medium">{acao.ticker}</TableCell>
               <TableCell>{acao.quantidade}</TableCell>
@@ -221,7 +261,7 @@ export default function Carteira() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortData(carteiraFiis).map((fii) => (
+          {carteiraFiis.map((fii) => (
             <TableRow key={fii.ticker}>
               <TableCell className="font-medium">{fii.ticker}</TableCell>
               <TableCell>{fii.quantidade}</TableCell>
@@ -250,7 +290,171 @@ export default function Carteira() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Minha Carteira</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Minha Carteira</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => resetForm()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Ativo
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white">
+            <DialogHeader>
+              <DialogTitle>Nova Transação</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 bg-white">
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Tipo de Ativo
+                </label>
+                <Select
+                  value={formData.ativoTipo}
+                  onValueChange={(value) =>
+                    handleSelectChange("ativoTipo", value)
+                  }
+                >
+                  <SelectTrigger className="bg-white border-gray-300">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="acao">Ação</SelectItem>
+                    <SelectItem value="fii">FII</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Ticker
+                </label>
+                <Input
+                  name="ticker"
+                  value={formData.ticker}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white border-gray-300"
+                />
+              </div>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Data
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-white border-gray-300",
+                        !formData.data && "text-gray-500"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data ? (
+                        format(
+                          new Date(
+                            formData.data.split("/").reverse().join("-")
+                          ),
+                          "dd/MM/yyyy",
+                          {
+                            locale: ptBR,
+                          }
+                        )
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        formData.data
+                          ? new Date(
+                              formData.data.split("/").reverse().join("-")
+                            )
+                          : undefined
+                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            data: format(date, "dd/MM/yyyy", { locale: ptBR }),
+                          }));
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Tipo de Transação
+                </label>
+                <Select
+                  value={formData.tipo}
+                  onValueChange={(value) => handleSelectChange("tipo", value)}
+                >
+                  <SelectTrigger className="bg-white border-gray-300">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="COMPRA">Compra</SelectItem>
+                    <SelectItem value="VENDA">Venda</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Preço
+                </label>
+                <Input
+                  name="preco"
+                  type="number"
+                  step="0.01"
+                  value={formData.preco}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white border-gray-300"
+                />
+              </div>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Quantidade
+                </label>
+                <Input
+                  name="quantidade"
+                  type="number"
+                  value={formData.quantidade}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white border-gray-300"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 bg-white">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="border-gray-300"
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  Adicionar
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
       <Tabs defaultValue="acoes" className="w-full">
         <TabsList>
           <TabsTrigger value="acoes">Ações</TabsTrigger>
