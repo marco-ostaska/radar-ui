@@ -36,7 +36,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 export default function Transacoes() {
   const [transacoesAcoes, setTransacoesAcoes] = useState([]);
@@ -46,12 +61,14 @@ export default function Transacoes() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransacao, setEditingTransacao] = useState(null);
   const [formData, setFormData] = useState({
+    tipoAtivo: "",
     ticker: "",
-    quantidade: "",
+    data: "",
+    tipoTransacao: "",
     preco: "",
-    tipo: "COMPRA",
-    data: format(new Date(), "dd/MM/yyyy"),
+    quantidade: "",
   });
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     loadTransacoes();
@@ -227,20 +244,24 @@ export default function Transacoes() {
               Nova Transação
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle>
                 {editingTransacao ? "Editar Transação" : "Nova Transação"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Tipo de Ativo</label>
+            <form onSubmit={handleSubmit} className="space-y-4 bg-white">
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Tipo de Ativo
+                </label>
                 <Select
-                  value={formData.tipo}
-                  onValueChange={(value) => handleSelectChange("tipo", value)}
+                  value={formData.tipoAtivo}
+                  onValueChange={(value) =>
+                    handleSelectChange("tipoAtivo", value)
+                  }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white border-gray-300">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -249,31 +270,98 @@ export default function Transacoes() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-sm font-medium">Ticker</label>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Ticker
+                </label>
                 <Input
                   name="ticker"
                   value={formData.ticker}
                   onChange={handleInputChange}
                   required
+                  className="bg-white border-gray-300"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium">Data</label>
-                <Input
-                  name="data"
-                  value={formData.data}
-                  onChange={handleInputChange}
-                  required
-                />
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Data
+                </label>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-white border-gray-300",
+                        !formData.data && "text-gray-500"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data ? (
+                        format(
+                          new Date(
+                            formData.data.split("/").reverse().join("-")
+                          ),
+                          "dd/MM/yyyy",
+                          {
+                            locale: ptBR,
+                          }
+                        )
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        formData.data
+                          ? new Date(
+                              formData.data.split("/").reverse().join("-")
+                            )
+                          : undefined
+                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          const formattedDate = format(date, "dd/MM/yyyy", {
+                            locale: ptBR,
+                          });
+                          setFormData((prev) => ({
+                            ...prev,
+                            data: formattedDate,
+                          }));
+                          setOpen(false);
+                        }
+                      }}
+                      className="rounded-md border bg-white"
+                      classNames={{
+                        day_selected:
+                          "bg-blue-600 text-white hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white",
+                        day_today: "bg-gray-100 text-gray-900",
+                        day: "hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900",
+                        head_cell: "text-gray-500 font-normal",
+                        cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-gray-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        nav_button: "hover:bg-gray-100 hover:text-gray-900",
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div>
-                <label className="text-sm font-medium">Tipo de Transação</label>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Tipo de Transação
+                </label>
                 <Select
-                  value={formData.tipo}
-                  onValueChange={(value) => handleSelectChange("tipo", value)}
+                  value={formData.tipoTransacao}
+                  onValueChange={(value) =>
+                    handleSelectChange("tipoTransacao", value)
+                  }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white border-gray-300">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -282,8 +370,11 @@ export default function Transacoes() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-sm font-medium">Preço</label>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Preço
+                </label>
                 <Input
                   name="preco"
                   type="number"
@@ -291,27 +382,34 @@ export default function Transacoes() {
                   value={formData.preco}
                   onChange={handleInputChange}
                   required
+                  className="bg-white border-gray-300"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium">Quantidade</label>
+
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Quantidade
+                </label>
                 <Input
                   name="quantidade"
                   type="number"
                   value={formData.quantidade}
                   onChange={handleInputChange}
                   required
+                  className="bg-white border-gray-300"
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+
+              <div className="flex justify-end space-x-2 bg-white">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
+                  className="border-gray-300"
                 >
                   Cancelar
                 </Button>
-                <Button type="submit">
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                   {editingTransacao ? "Salvar" : "Adicionar"}
                 </Button>
               </div>
