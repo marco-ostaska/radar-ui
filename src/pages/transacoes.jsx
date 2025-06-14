@@ -112,9 +112,11 @@ export default function Transacoes() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Dados enviados:", formData);
+    console.log("Tipo de Ativo:", formData.tipoAtivo);
     try {
       if (editingTransacao) {
-        if (editingTransacao.tipo === "acao") {
+        if (formData.tipoAtivo === "acao") {
           await atualizarTransacaoAcoes(editingTransacao.id, {
             ...formData,
             carteiraId: 1,
@@ -126,7 +128,7 @@ export default function Transacoes() {
           });
         }
       } else {
-        if (formData.tipo === "acao") {
+        if (formData.tipoAtivo === "acao") {
           await adicionarTransacaoAcoes({
             ...formData,
             carteiraId: 1,
