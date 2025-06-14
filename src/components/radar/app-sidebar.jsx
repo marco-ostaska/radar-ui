@@ -61,7 +61,8 @@ const groups = [
     icon: Wallet,
     title: "Carteira",
     items: [
-      { id: "minha-carteira", title: "Minha Carteira", href: "/carteira" },
+      { id: "carteira-acoes", title: "Carteira de Ações", href: "/carteira/acoes" },
+      { id: "carteira-fiis", title: "Carteira de FIIs", href: "/carteira/fiis" },
       { id: "transacoes", title: "Transações", href: "/transacoes" },
     ],
   },
@@ -134,19 +135,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  to="/carteira"
-                  icon={<Wallet className="h-4 w-4" />}
-                  label="Carteira"
-                />
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Removed duplicate Carteira button */}
       </SidebarContent>
       <SidebarFooter className="bg-slate-300 px-4 py-4 text-sm">
         <div className="flex flex-col gap-3">
