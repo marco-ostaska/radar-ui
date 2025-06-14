@@ -122,6 +122,19 @@ export default function CarteiraFiisPage() {
   if (loading) return <div className="p-4">Carregando carteira de FIIs...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
+  const getRecomendacaoColor = (recomendacao) => {
+    switch (recomendacao) {
+      case "COMPRAR ou APORTAR":
+        return "bg-green-100 text-green-800";
+      case "MANTER com cautela":
+        return "bg-yellow-100 text-yellow-800";
+      case "VENDER":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -283,6 +296,7 @@ export default function CarteiraFiisPage() {
               <TableHead>Rendimento Mensal</TableHead>
               <TableHead>DY</TableHead>
               <TableHead>P/VP</TableHead>
+              <TableHead>Recomendação</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -306,6 +320,11 @@ export default function CarteiraFiisPage() {
                 </TableCell>
                 <TableCell>{formatPercent(fii.dy)}</TableCell>
                 <TableCell>{fii.pvp.toFixed(2)}</TableCell>
+                <TableCell>
+                  <Badge className={getRecomendacaoColor(fii.recomendacao)}>
+                    {fii.recomendacao}
+                  </Badge>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
