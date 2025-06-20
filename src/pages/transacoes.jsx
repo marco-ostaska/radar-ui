@@ -100,44 +100,53 @@ export default function Transacoes() {
   };
 
   const resetForm = () => {
+    // Usar dia atual no formato dd/MM/yyyy
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    const dataAtual = `${dia}/${mes}/${ano}`;
+    
     setFormData({
+      tipoAtivo: "",
       ticker: "",
       quantidade: "",
       preco: "",
-      tipo: "COMPRA",
-      data: format(new Date(), "dd/MM/yyyy"),
+      tipoTransacao: "COMPRA",
+      data: dataAtual,
     });
     setEditingTransacao(null);
   };
+
+  // A API aceita a data no formato dd/MM/yyyy, não precisamos converter
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Dados enviados:", formData);
     console.log("Tipo de Ativo:", formData.tipoAtivo);
     try {
+      const dataToSend = {
+        ticker: formData.ticker,
+        quantidade: formData.quantidade,
+        preco: formData.preco,
+        tipo: formData.tipoTransacao
+          ? formData.tipoTransacao.toUpperCase()
+          : undefined,
+        carteiraId: 1, // sempre camelCase para as funções da API
+        data: formData.data, // A API espera o formato dd/MM/yyyy
+      };
+      
       if (editingTransacao) {
         if (formData.tipoAtivo === "acao") {
-          await atualizarTransacaoAcoes(editingTransacao.id, {
-            ...formData,
-            carteiraId: 1,
-          });
+          await atualizarTransacaoAcoes(editingTransacao.id, dataToSend);
         } else {
-          await atualizarTransacaoFiis(editingTransacao.id, {
-            ...formData,
-            carteiraId: 1,
-          });
+          await atualizarTransacaoFiis(editingTransacao.id, dataToSend);
         }
       } else {
         if (formData.tipoAtivo === "acao") {
-          await adicionarTransacaoAcoes({
-            ...formData,
-            carteiraId: 1,
-          });
+          await adicionarTransacaoAcoes(dataToSend);
         } else {
-          await adicionarTransacaoFiis({
-            ...formData,
-            carteiraId: 1,
-          });
+          await adicionarTransacaoFiis(dataToSend);
         }
       }
       setIsDialogOpen(false);
@@ -150,12 +159,15 @@ export default function Transacoes() {
 
   const handleEdit = (transacao, tipo) => {
     setEditingTransacao({ ...transacao, tipo });
+    // Garantir que a data seja exibida no formato dd/MM/yyyy
+    const dataFormatada = formatDate(transacao.data);
     setFormData({
       ticker: transacao.ticker,
       quantidade: transacao.quantidade.toString(),
       preco: transacao.preco.toString(),
-      tipo: transacao.tipo,
-      data: format(new Date(transacao.data), "dd/MM/yyyy"),
+      tipoTransacao: transacao.tipo,
+      data: dataFormatada,
+      tipoAtivo: tipo,
     });
     setIsDialogOpen(true);
   };
@@ -183,8 +195,57 @@ export default function Transacoes() {
   };
 
   const formatDate = (dateString) => {
-    return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+    if (!dateString) return "";
+    
+    // Se já estiver em dd/MM/yyyy, retorna direto
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Se vier como yyyy-MM-dd, converte manualmente
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [ano, mes, dia] = dateString.split("-");
+      return `${dia}/${mes}/${ano}`;
+    }
+    
+    // Se vier como string ISO (ex: 2025-06-20T00:00:00.000Z)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateString)) {
+      return dateString.substring(8, 10) + "/" + 
+             dateString.substring(5, 7) + "/" + 
+             dateString.substring(0, 4);
+    }
+    
+    // Outros formatos, retorna como está
+    return dateString;
   };
+
+  // Função para validar se a data está no formato dd/MM/yyyy e é uma data válida
+  function parseDateString(dateStr) {
+    if (!dateStr) return undefined;
+    const [day, month, year] = dateStr.split("/").map(Number);
+    if (
+      !day ||
+      !month ||
+      !year ||
+      day < 1 ||
+      day > 31 ||
+      month < 1 ||
+      month > 12 ||
+      year < 1000
+    ) {
+      return undefined;
+    }
+    const date = new Date(year, month - 1, day);
+    // Confirma se a data é realmente igual à informada (evita 32/01/2024 virar 01/02/2024)
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return undefined;
+    }
+    return date;
+  }
 
   if (loading) return <div className="p-4">Carregando transações...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
@@ -292,44 +353,43 @@ export default function Transacoes() {
                 </label>
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal bg-white border-gray-300",
-                        !formData.data && "text-gray-500"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data ? (
-                        format(
-                          new Date(
-                            formData.data.split("/").reverse().join("-")
-                          ),
-                          "dd/MM/yyyy",
-                          {
-                            locale: ptBR,
-                          }
-                        )
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                    </Button>
+                    <div className="relative w-full">
+                      <Input
+                        name="data"
+                        value={formData.data}
+                        onChange={handleInputChange}
+                        placeholder="dd/MM/yyyy"
+                        className="bg-white border-gray-300 pr-10 w-full"
+                        autoComplete="off"
+                      />
+                      <CalendarIcon
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                        onClick={() => setOpen((v) => !v)}
+                        size={18}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Abrir calendário"
+                      />
+                    </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={
-                        formData.data
-                          ? new Date(
-                              formData.data.split("/").reverse().join("-")
-                            )
-                          : undefined
-                      }
+                      selected={parseDateString(formData.data)}
                       onSelect={(date) => {
                         if (date) {
-                          const formattedDate = format(date, "dd/MM/yyyy", {
-                            locale: ptBR,
-                          });
+                          const userTimezoneDate = new Date(
+                            date.getFullYear(),
+                            date.getMonth(),
+                            date.getDate()
+                          );
+                          const formattedDate = format(
+                            userTimezoneDate,
+                            "dd/MM/yyyy",
+                            {
+                              locale: ptBR,
+                            }
+                          );
                           setFormData((prev) => ({
                             ...prev,
                             data: formattedDate,
