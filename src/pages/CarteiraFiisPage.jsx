@@ -40,6 +40,13 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CarteiraFiisPage() {
+  const [totals, setTotals] = useState({
+    totalInvestido: 0,
+    totalSaldo: 0,
+    totalVariacao: 0,
+    totalQuantidade: 0,
+    totalVariacaoPercent: 0,
+  });
   const [carteiraFiis, setCarteiraFiis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -78,6 +85,20 @@ export default function CarteiraFiisPage() {
       setLoading(true);
       const fiis = await fetchCarteiraFiis();
       setCarteiraFiis(sortData(fiis, sortConfig.key, sortConfig.direction));
+      // Calculate totals
+      const totalInvestido = fiis.reduce((sum, fii) => sum + fii.valor_investido, 0);
+      const totalSaldo = fiis.reduce((sum, fii) => sum + fii.saldo, 0);
+      const totalVariacao = totalSaldo - totalInvestido;
+      const totalQuantidade = fiis.length; // Count of unique assets
+      const totalVariacaoPercent = totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
+
+      setTotals({
+        totalInvestido,
+        totalSaldo,
+        totalVariacao,
+        totalQuantidade,
+        totalVariacaoPercent,
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -153,6 +174,29 @@ export default function CarteiraFiisPage() {
 
   return (
     <div className="container mx-auto p-4">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumo da Carteira</h2>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Total Investido</span>
+            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Saldo Total</span>
+            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalSaldo)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Variação Total</span>
+            <span className={totals.totalVariacao >= 0 ? "text-lg font-bold text-green-600" : "text-lg font-bold text-red-600"}>
+              {formatCurrency(totals.totalVariacao)} ({formatPercent(totals.totalVariacaoPercent)})
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Quantidade de Ativos</span>
+            <span className="text-lg font-bold text-gray-900">{totals.totalQuantidade}</span>
+          </div>
+        </div>
+      </div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Carteira de FIIs</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
