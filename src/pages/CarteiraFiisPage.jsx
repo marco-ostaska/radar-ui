@@ -46,6 +46,7 @@ export default function CarteiraFiisPage() {
     totalVariacao: 0,
     totalQuantidade: 0,
     totalVariacaoPercent: 0,
+    totalRendimentosMensais: 0,
   });
   const [carteiraFiis, setCarteiraFiis] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +92,10 @@ export default function CarteiraFiisPage() {
       const totalVariacao = totalSaldo - totalInvestido;
       const totalQuantidade = fiis.length; // Count of unique assets
       const totalVariacaoPercent = totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
+      const totalRendimentosMensais = fiis.reduce((sum, fii) => {
+        const rendimento = parseFloat(fii?.rendimento_mensal_estimado || 0);
+        return sum + (isNaN(rendimento) ? 0 : rendimento);
+      }, 0);
 
       setTotals({
         totalInvestido,
@@ -98,6 +103,16 @@ export default function CarteiraFiisPage() {
         totalVariacao,
         totalQuantidade,
         totalVariacaoPercent,
+        totalRendimentosMensais,
+      });
+
+      setTotals({
+        totalInvestido,
+        totalSaldo,
+        totalVariacao,
+        totalQuantidade,
+        totalVariacaoPercent,
+        totalRendimentosMensais,
       });
     } catch (err) {
       setError(err.message);
@@ -180,6 +195,10 @@ export default function CarteiraFiisPage() {
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Total Investido</span>
             <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Rendimentos Mensais Estimados</span>
+            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalRendimentosMensais)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Saldo Total</span>
