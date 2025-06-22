@@ -201,12 +201,8 @@ export default function CarteiraFiisPage() {
             <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500">DY on Cost</span>
-            <span className="text-lg font-bold text-gray-900">{formatPercent(totals.dyOnCost)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Rendimentos Mensais Estimados</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalRendimentosMensais)}</span>
+            <span className="text-sm text-gray-500">Total Investido</span>
+            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Saldo Total</span>
@@ -217,6 +213,14 @@ export default function CarteiraFiisPage() {
             <span className={totals.totalVariacao >= 0 ? "text-lg font-bold text-green-600" : "text-lg font-bold text-red-600"}>
               {formatCurrency(totals.totalVariacao)} ({formatPercent(totals.totalVariacaoPercent)})
             </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">DY on Cost</span>
+            <span className="text-lg font-bold text-gray-900">{formatPercent(totals.dyOnCost)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Rendimentos Mensais Estimados</span>
+            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalRendimentosMensais)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Quantidade de Ativos</span>
