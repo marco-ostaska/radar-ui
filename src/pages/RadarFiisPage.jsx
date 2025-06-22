@@ -247,8 +247,25 @@ export default function RadarFiisPage() {
       .catch((err) => console.error("Erro ao buscar ativos da categoria:", err));
   }, [selectedCategory, ativosPorCategoria]);
 
+  const handleForceUpdate = async () => {
+    if (!selectedCategory || !ativosPorCategoria[selectedCategory]) return;
+
+    try {
+      for (const ticker of ativosPorCategoria[selectedCategory]) {
+        await fetchRadaFii(ticker, true);
+      }
+      alert("Force update completed!");
+    } catch (err) {
+      console.error("Error during force update:", err);
+      alert("An error occurred during the force update.");
+    }
+  };
+
   return (
     <div className="w-full">
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleForceUpdate}>Force Update</Button>
+      </div>
       <h1 className="text-2xl font-bold text-center my-4">Radar FIIs</h1>
       {categorias.length === 0 ? (
         <p>Carregando categorias...</p>

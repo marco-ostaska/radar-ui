@@ -1,9 +1,9 @@
 //src/api/fii/radar.js
 
-export async function fetchRadaFii(ticker) {
+export async function fetchRadaFii(ticker, force = false) {
   const url = `http://localhost:8000/fii/radar?ticker=${encodeURIComponent(
     ticker
-  )}`;
+  )}&force=${force}`;
 
   const res = await fetch(url, {
     headers: {
