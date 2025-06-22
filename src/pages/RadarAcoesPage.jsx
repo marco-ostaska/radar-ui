@@ -53,10 +53,18 @@ function handleForceUpdateAll(data, setIsRefreshing) {
   ).finally(() => setIsRefreshing(false));
 }
 
-function handleForceUpdateSingle(ticker) {
+function handleForceUpdateSingle(ticker, setUpdating) {
+  setUpdating((prev) => ({ ...prev, [ticker]: true }));
   fetchRadarAcao(ticker, true)
-    .then(() => console.log(`Force update completed for ${ticker}`))
-    .catch((err) => console.error(`Error during force update for ${ticker}:`, err));
+    .then(() => {
+      console.log(`Force update completed for ${ticker}`);
+      alert(`Force update completed for ${ticker}!`);
+    })
+    .catch((err) => {
+      console.error(`Error during force update for ${ticker}:`, err);
+      alert(`An error occurred during the force update for ${ticker}.`);
+    })
+    .finally(() => setUpdating((prev) => ({ ...prev, [ticker]: false })));
 }
 
 export default function RadarAcoes() {
@@ -67,6 +75,7 @@ export default function RadarAcoes() {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [totalAtivos, setTotalAtivos] = useState(0);
   const hasFetched = useRef(false);
+  const [isUpdating, setIsUpdating] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Carregar os índices ao iniciar
@@ -265,23 +274,39 @@ export default function RadarAcoes() {
         header: "Force Update",
         cell: ({ row }) => (
           <Button
-            onClick={() => handleForceUpdateSingle(row.getValue("ticker"))}
+            onClick={() => handleForceUpdateSingle(row.getValue("ticker"), setIsUpdating)}
             className="hover:text-blue-500 active:text-gray-500"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <polyline points="1 20 1 14 7 14"></polyline>
-              <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
-            </svg>
+            {isUpdating[row.getValue("ticker")] ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="animate-spin h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path d="M4 12a8 8 0 018-8"></path>
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
+              </svg>
+            )}
           </Button>
         ),
       },
