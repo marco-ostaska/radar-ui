@@ -74,13 +74,15 @@ export default function CarteiraAcoesPage() {
       const totalInvestido = acoes.reduce((sum, acao) => sum + acao.valor_investido, 0);
       const totalSaldo = acoes.reduce((sum, acao) => sum + acao.saldo, 0);
       const totalVariacao = totalSaldo - totalInvestido;
-      const totalQuantidade = acoes.reduce((sum, acao) => sum + acao.quantidade, 0);
+      const totalQuantidade = acoes.length; // Count of unique assets
+      const totalVariacaoPercent = totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
 
       setTotals({
         totalInvestido,
         totalSaldo,
         totalVariacao,
         totalQuantidade,
+        totalVariacaoPercent,
       });
     } catch (err) {
       setError(err.message);
@@ -171,26 +173,29 @@ export default function CarteiraAcoesPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="bg-gray-100 p-4 rounded-md shadow-md w-full mb-6">
-        <h2 className="text-lg font-bold mb-2">Resumo da Carteira</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <strong>Total Investido:</strong> {formatCurrency(totals.totalInvestido)}
-          </div>
-          <div>
-            <strong>Saldo Total:</strong> {formatCurrency(totals.totalSaldo)}
-          </div>
-          <div>
-            <strong>Variação Total:</strong>{" "}
-            <span className={totals.totalVariacao >= 0 ? "text-green-600" : "text-red-600"}>
-              {formatCurrency(totals.totalVariacao)}
-            </span>
-          </div>
-          <div>
-            <strong>Total de Ações:</strong> {totals.totalQuantidade}
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumo da Carteira</h2>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-500">Total Investido</span>
+              <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-500">Saldo Total</span>
+              <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalSaldo)}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-500">Variação Total</span>
+              <span className={totals.totalVariacao >= 0 ? "text-lg font-bold text-green-600" : "text-lg font-bold text-red-600"}>
+                {formatCurrency(totals.totalVariacao)} ({formatPercent(totals.totalVariacaoPercent)})
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-500">Quantidade de Ativos</span>
+              <span className="text-lg font-bold text-gray-900">{totals.totalQuantidade}</span>
+            </div>
           </div>
         </div>
-      </div>
       <h1 className="text-2xl font-bold mb-4">Carteira de Ações</h1>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
