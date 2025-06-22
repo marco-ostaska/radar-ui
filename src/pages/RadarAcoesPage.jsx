@@ -39,6 +39,26 @@ function setTextColor(atributo, valor) {
   return "text-red-700";
 }
 
+function handleForceUpdateAll(data, setIsRefreshing) {
+  setIsRefreshing(true);
+  Promise.all(
+    data.map(async (ativo) => {
+      try {
+        await fetchRadarAcao(ativo.ticker, true);
+        console.log(`Force update completed for ${ativo.ticker}`);
+      } catch (err) {
+        console.error(`Error during force update for ${ativo.ticker}:`, err);
+      }
+    })
+  ).finally(() => setIsRefreshing(false));
+}
+
+function handleForceUpdateSingle(ticker) {
+  fetchRadarAcao(ticker, true)
+    .then(() => console.log(`Force update completed for ${ticker}`))
+    .catch((err) => console.error(`Error during force update for ${ticker}:`, err));
+}
+
 export default function RadarAcoes() {
   const [data, setData] = useState([]);
   const [indices, setIndices] = useState({});
@@ -47,6 +67,7 @@ export default function RadarAcoes() {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [totalAtivos, setTotalAtivos] = useState(0);
   const hasFetched = useRef(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Carregar os índices ao iniciar
   useEffect(() => {
@@ -239,6 +260,31 @@ export default function RadarAcoes() {
           );
         },
       },
+      {
+        accessorKey: "forceUpdate",
+        header: "Force Update",
+        cell: ({ row }) => (
+          <Button
+            onClick={() => handleForceUpdateSingle(row.getValue("ticker"))}
+            className="hover:text-blue-500 active:text-gray-500"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
+            </svg>
+          </Button>
+        ),
+      },
     ],
     [jurosReais]
   );
@@ -262,6 +308,28 @@ export default function RadarAcoes() {
           totalAtivosCarregados {data.length} de {totalAtivos} ativos.
           <Progress value={(data.length / totalAtivos) * 100} />
         </div>
+        <Button
+          onClick={() => handleForceUpdateAll(data, setIsRefreshing)}
+          className="hover:text-blue-500 active:text-gray-500"
+        >
+          {isRefreshing ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="animate-spin h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path d="M4 12a8 8 0 018-8"></path>
+            </svg>
+          ) : (
+            "Force Geral"
+          )}
+        </Button>
         <Input
           placeholder="Filtrar Ativo"
           value={table.getColumn("ticker")?.getFilterValue() ?? ""}
