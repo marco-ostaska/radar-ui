@@ -53,12 +53,17 @@ function handleForceUpdateAll(data, setIsRefreshing) {
   ).finally(() => setIsRefreshing(false));
 }
 
-function handleForceUpdateSingle(ticker, setUpdating) {
+function handleForceUpdateSingle(ticker, setUpdating, setData) {
   setUpdating((prev) => ({ ...prev, [ticker]: true }));
   fetchRadarAcao(ticker, true)
-    .then(() => {
+    .then((updatedData) => {
       console.log(`Force update completed for ${ticker}`);
       alert(`Force update completed for ${ticker}!`);
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.ticker === ticker ? { ...item, ...updatedData } : item
+        )
+      );
     })
     .catch((err) => {
       console.error(`Error during force update for ${ticker}:`, err);
@@ -273,10 +278,12 @@ export default function RadarAcoes() {
         accessorKey: "forceUpdate",
         header: "Force Update",
         cell: ({ row }) => (
-          <Button
-            onClick={() => handleForceUpdateSingle(row.getValue("ticker"), setIsUpdating)}
-            className="hover:text-blue-500 active:text-gray-500"
-          >
+<Button
+  onClick={() =>
+    handleForceUpdateSingle(row.getValue("ticker"), setIsUpdating, setData)
+  }
+  className="hover:text-blue-500 active:text-gray-500"
+>
             {isUpdating[row.getValue("ticker")] ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
