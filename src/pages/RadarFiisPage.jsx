@@ -37,6 +37,16 @@ function setTextColor(atributo, valor) {
 }
 
 function TabelaCategoria({ data, totalAtivos, indiceBase }) {
+  const handleForceUpdate = async (ticker) => {
+    try {
+      await fetchRadaFii(ticker, true);
+      alert(`Force update completed for ${ticker}!`);
+    } catch (err) {
+      console.error(`Error during force update for ${ticker}:`, err);
+      alert(`An error occurred during the force update for ${ticker}.`);
+    }
+  };
+
   const columns = React.useMemo(() => [
     {
       accessorKey: "ticker",
@@ -148,8 +158,32 @@ function TabelaCategoria({ data, totalAtivos, indiceBase }) {
         const b = rowB.getValue(columnId) ? 1 : 0;
         return a - b;
       }
-}
-
+    },
+    {
+      accessorKey: "forceUpdate",
+      header: "Force Update",
+      cell: ({ row }) => (
+        <Button
+          onClick={() => handleForceUpdate(row.getValue("ticker"))}
+          className="hover:text-blue-500 active:text-gray-500"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
+          </svg>
+        </Button>
+      )
+    }
   ], [indiceBase]);
 
   const table = useReactTable({
@@ -264,7 +298,25 @@ export default function RadarFiisPage() {
   return (
     <div className="w-full">
       <div className="flex justify-end mb-4">
-        <Button onClick={handleForceUpdate}>Force Update</Button>
+        <Button
+          onClick={handleForceUpdate}
+          className="hover:text-blue-500 active:text-gray-500"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
+          </svg>
+        </Button>
       </div>
       <h1 className="text-2xl font-bold text-center my-4">Radar FIIs</h1>
       {categorias.length === 0 ? (
