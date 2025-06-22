@@ -185,6 +185,7 @@ export default function CarteiraFiisPage() {
       case "MANTER com cautela":
         return "bg-yellow-100 text-yellow-800";
       case "VENDER":
+      case "VENDER ou realizar parcial":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -439,7 +440,18 @@ export default function CarteiraFiisPage() {
                   Saldo <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
-              <TableHead>Rendimento Mensal</TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "rendimento_mensal_estimado",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Rendimento Mensal <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
               <TableHead>
                 <button
                   onClick={() =>
