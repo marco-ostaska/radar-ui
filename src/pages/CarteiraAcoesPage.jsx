@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 export default function CarteiraAcoesPage() {
   const [carteiraAcoes, setCarteiraAcoes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -133,6 +134,20 @@ export default function CarteiraAcoesPage() {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      const direction = prev.key === key && prev.direction === "asc" ? "desc" : "asc";
+      return { key, direction };
+    });
+    setCarteiraAcoes((prev) =>
+      [...prev].sort((a, b) => {
+        if (a[key] < b[key]) return sortConfig.direction === "asc" ? -1 : 1;
+        if (a[key] > b[key]) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      })
+    );
   };
 
   return (
@@ -286,17 +301,41 @@ export default function CarteiraAcoesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ticker</TableHead>
-              <TableHead>Qtd</TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("ticker")}>
+                  Ticker <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("quantidade")}>
+                  Qtd <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
               <TableHead>Preço Médio</TableHead>
               <TableHead>Preço Atual</TableHead>
-              <TableHead>Variação</TableHead>
-              <TableHead>Valor Investido</TableHead>
-              <TableHead>Saldo</TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("variacao")}>
+                  Variação <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("valor_investido")}>
+                  Valor Investido <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("saldo")}>
+                  Saldo <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
               <TableHead>Lucro Latente</TableHead>
               <TableHead>Excesso P/L</TableHead>
               <TableHead>Excesso DY</TableHead>
-              <TableHead>Recomendação</TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("recomendacao")}>
+                  Recomendação <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
