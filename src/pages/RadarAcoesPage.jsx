@@ -153,7 +153,7 @@ export default function RadarAcoes() {
           const tetoDY = row.getValue("valor_teto_por_dy");
           return (
             <div className={`${setTextColor(tetoDY, row.getValue("cotacao"))}`}>
-              R$ {tetoDY}
+              R$ {tetoDY?.toFixed(2) || "0.00"}
             </div>
           );
         },
