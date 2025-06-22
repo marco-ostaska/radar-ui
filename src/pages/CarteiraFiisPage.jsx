@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 export default function CarteiraFiisPage() {
   const [carteiraFiis, setCarteiraFiis] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -57,11 +58,26 @@ export default function CarteiraFiisPage() {
     loadCarteira();
   }, []);
 
+  useEffect(() => {
+    setCarteiraFiis((prev) => sortData(prev, sortConfig.key, sortConfig.direction));
+  }, [sortConfig]);
+
+  const sortData = (data, key, direction) => {
+    if (!key) return data;
+    return [...data].sort((a, b) => {
+      const aValue = key === "variacao" ? a[key] || 0 : a[key];
+      const bValue = key === "variacao" ? b[key] || 0 : b[key];
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
   const loadCarteira = async () => {
     try {
       setLoading(true);
       const fiis = await fetchCarteiraFiis();
-      setCarteiraFiis(fiis);
+      setCarteiraFiis(sortData(fiis, sortConfig.key, sortConfig.direction));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -286,17 +302,94 @@ export default function CarteiraFiisPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ticker</TableHead>
-              <TableHead>Qtd</TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "ticker",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Ticker <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "quantidade",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Qtd <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
               <TableHead>Preço Médio</TableHead>
               <TableHead>Preço Atual</TableHead>
-              <TableHead>Variação</TableHead>
-              <TableHead>Valor Investido</TableHead>
-              <TableHead>Saldo</TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "variacao",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Variação <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "valor_investido",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Valor Investido <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "saldo",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Saldo <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
               <TableHead>Rendimento Mensal</TableHead>
-              <TableHead>DY</TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "dy",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  DY <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
               <TableHead>P/VP</TableHead>
-              <TableHead>Recomendação</TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "recomendacao",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Recomendação <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
