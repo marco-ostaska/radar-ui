@@ -97,6 +97,8 @@ export default function CarteiraFiisPage() {
         return sum + (isNaN(rendimento) ? 0 : rendimento);
       }, 0);
 
+      const dyOnCost = totalInvestido > 0 ? (totalRendimentosMensais / totalInvestido) * 100 : 0;
+
       setTotals({
         totalInvestido,
         totalSaldo,
@@ -104,6 +106,7 @@ export default function CarteiraFiisPage() {
         totalQuantidade,
         totalVariacaoPercent,
         totalRendimentosMensais,
+        dyOnCost,
       });
 
       setTotals({
@@ -113,6 +116,7 @@ export default function CarteiraFiisPage() {
         totalQuantidade,
         totalVariacaoPercent,
         totalRendimentosMensais,
+        dyOnCost,
       });
     } catch (err) {
       setError(err.message);
@@ -195,6 +199,10 @@ export default function CarteiraFiisPage() {
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Total Investido</span>
             <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">DY on Cost</span>
+            <span className="text-lg font-bold text-gray-900">{formatPercent(totals.dyOnCost)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Rendimentos Mensais Estimados</span>
