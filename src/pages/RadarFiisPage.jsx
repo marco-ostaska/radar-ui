@@ -281,7 +281,10 @@ export default function RadarFiisPage() {
       .catch((err) => console.error("Erro ao buscar ativos da categoria:", err));
   }, [selectedCategory, ativosPorCategoria]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const handleForceUpdate = async () => {
+    setIsRefreshing(true);
     if (!selectedCategory || !ativosPorCategoria[selectedCategory]) return;
 
     try {
@@ -289,7 +292,8 @@ export default function RadarFiisPage() {
         await fetchRadaFii(ticker, true);
       }
       alert("Force update completed!");
-    } catch (err) {
+    } finally {
+      setIsRefreshing(false);
       console.error("Error during force update:", err);
       alert("An error occurred during the force update.");
     }
@@ -302,7 +306,22 @@ export default function RadarFiisPage() {
           onClick={handleForceUpdate}
           className="hover:text-blue-500 active:text-gray-500"
         >
-          <svg
+          {isRefreshing ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="animate-spin h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path d="M4 12a8 8 0 018-8"></path>
+            </svg>
+          ) : (
+            <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5"
             viewBox="0 0 24 24"
@@ -316,6 +335,7 @@ export default function RadarFiisPage() {
             <polyline points="1 20 1 14 7 14"></polyline>
             <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
           </svg>
+          )}
         </Button>
       </div>
       <h1 className="text-2xl font-bold text-center my-4">Radar FIIs</h1>
