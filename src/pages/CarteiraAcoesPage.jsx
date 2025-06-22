@@ -42,6 +42,12 @@ import { cn } from "@/lib/utils";
 export default function CarteiraAcoesPage() {
   const [carteiraAcoes, setCarteiraAcoes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totals, setTotals] = useState({
+    totalInvestido: 0,
+    totalSaldo: 0,
+    totalVariacao: 0,
+    totalQuantidade: 0,
+  });
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,6 +69,19 @@ export default function CarteiraAcoesPage() {
       setLoading(true);
       const acoes = await fetchCarteira();
       setCarteiraAcoes(acoes);
+
+      // Calculate totals
+      const totalInvestido = acoes.reduce((sum, acao) => sum + acao.valor_investido, 0);
+      const totalSaldo = acoes.reduce((sum, acao) => sum + acao.saldo, 0);
+      const totalVariacao = totalSaldo - totalInvestido;
+      const totalQuantidade = acoes.reduce((sum, acao) => sum + acao.quantidade, 0);
+
+      setTotals({
+        totalInvestido,
+        totalSaldo,
+        totalVariacao,
+        totalQuantidade,
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -152,151 +171,154 @@ export default function CarteiraAcoesPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Carteira de Ações</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => resetForm()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Ação
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white">
-            <DialogHeader>
-              <DialogTitle>Nova Transação</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 bg-white">
-              <div className="bg-white">
-                <label className="text-sm font-medium text-gray-700">
-                  Ticker
-                </label>
-                <Input
-                  name="ticker"
-                  value={formData.ticker}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white border-gray-300"
-                />
-              </div>
-
-              <div className="bg-white">
-                <label className="text-sm font-medium text-gray-700">
-                  Data
-                </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal bg-white border-gray-300",
-                        !formData.data && "text-gray-500"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data ? (
-                        format(
-                          new Date(
-                            formData.data.split("/").reverse().join("-")
-                          ),
-                          "dd/MM/yyyy",
-                          {
-                            locale: ptBR,
-                          }
-                        )
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        formData.data
-                          ? new Date(
-                              formData.data.split("/").reverse().join("-")
-                            )
-                          : undefined
-                      }
-                      onSelect={(date) => {
-                        if (date) {
-                          setFormData((prev) => ({
-                            ...prev,
-                            data: format(date, "dd/MM/yyyy", { locale: ptBR }),
-                          }));
-                        }
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="bg-white">
-                <label className="text-sm font-medium text-gray-700">
-                  Tipo de Transação
-                </label>
-                <Select
-                  value={formData.tipo}
-                  onValueChange={(value) => handleSelectChange("tipo", value)}
-                >
-                  <SelectTrigger className="bg-white border-gray-300">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="COMPRA">Compra</SelectItem>
-                    <SelectItem value="VENDA">Venda</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="bg-white">
-                <label className="text-sm font-medium text-gray-700">
-                  Preço
-                </label>
-                <Input
-                  name="preco"
-                  type="number"
-                  step="0.01"
-                  value={formData.preco}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white border-gray-300"
-                />
-              </div>
-
-              <div className="bg-white">
-                <label className="text-sm font-medium text-gray-700">
-                  Quantidade
-                </label>
-                <Input
-                  name="quantidade"
-                  type="number"
-                  value={formData.quantidade}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white border-gray-300"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2 bg-white">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="border-gray-300"
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                  Adicionar
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+      <div className="bg-gray-100 p-4 rounded-md shadow-md w-full mb-6">
+        <h2 className="text-lg font-bold mb-2">Resumo da Carteira</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <strong>Total Investido:</strong> {formatCurrency(totals.totalInvestido)}
+          </div>
+          <div>
+            <strong>Saldo Total:</strong> {formatCurrency(totals.totalSaldo)}
+          </div>
+          <div>
+            <strong>Variação Total:</strong>{" "}
+            <span className={totals.totalVariacao >= 0 ? "text-green-600" : "text-red-600"}>
+              {formatCurrency(totals.totalVariacao)}
+            </span>
+          </div>
+          <div>
+            <strong>Total de Ações:</strong> {totals.totalQuantidade}
+          </div>
+        </div>
       </div>
+      <h1 className="text-2xl font-bold mb-4">Carteira de Ações</h1>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => resetForm()}>
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Ação
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Nova Transação</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 bg-white">
+            <div className="bg-white">
+              <label className="text-sm font-medium text-gray-700">Ticker</label>
+              <Input
+                name="ticker"
+                value={formData.ticker}
+                onChange={handleInputChange}
+                required
+                className="bg-white border-gray-300"
+              />
+            </div>
 
+            <div className="bg-white">
+              <label className="text-sm font-medium text-gray-700">Data</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal bg-white border-gray-300",
+                      !formData.data && "text-gray-500"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.data ? (
+                      format(
+                        new Date(formData.data.split("/").reverse().join("-")),
+                        "dd/MM/yyyy",
+                        {
+                          locale: ptBR,
+                        }
+                      )
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      formData.data
+                        ? new Date(formData.data.split("/").reverse().join("-"))
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      if (date) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          data: format(date, "dd/MM/yyyy", { locale: ptBR }),
+                        }));
+                      }
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="bg-white">
+              <label className="text-sm font-medium text-gray-700">Tipo de Transação</label>
+              <Select
+                value={formData.tipo}
+                onValueChange={(value) => handleSelectChange("tipo", value)}
+              >
+                <SelectTrigger className="bg-white border-gray-300">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="COMPRA">Compra</SelectItem>
+                  <SelectItem value="VENDA">Venda</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="bg-white">
+              <label className="text-sm font-medium text-gray-700">Preço</label>
+              <Input
+                name="preco"
+                type="number"
+                step="0.01"
+                value={formData.preco}
+                onChange={handleInputChange}
+                required
+                className="bg-white border-gray-300"
+              />
+            </div>
+
+            <div className="bg-white">
+              <label className="text-sm font-medium text-gray-700">Quantidade</label>
+              <Input
+                name="quantidade"
+                type="number"
+                value={formData.quantidade}
+                onChange={handleInputChange}
+                required
+                className="bg-white border-gray-300"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 bg-white">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="border-gray-300"
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                Adicionar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
