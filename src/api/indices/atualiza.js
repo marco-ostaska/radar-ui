@@ -1,8 +1,9 @@
 // src/api/indices/atualiza.js
 
 export async function fetchIndices(force = false) {
+  console.log("API_URL:", process.env.API_URL);
   const res = await fetch(
-    `http://localhost:8000/indices/atualiza?force=${force}`
+    `${"http://192.168.68.116:8000"}/indices/atualiza?force=${force}`
   );
   if (!res.ok) throw new Error("Erro ao buscar índices");
   const data = await res.json();

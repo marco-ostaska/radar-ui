@@ -1,7 +1,7 @@
 //src/api/fii/radar.js
 
 export async function fetchRadaFii(ticker, force = false) {
-  const url = `http://localhost:8000/fii/radar?ticker=${encodeURIComponent(
+  const url = `http://192.168.68.116:8000/fii/radar?ticker=${encodeURIComponent(
     ticker
   )}&force=${force}`;
 

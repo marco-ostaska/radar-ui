@@ -2,7 +2,7 @@
 
 export async function listarAtivosPorCategoria(categoria) {
   const response = await fetch(
-    `http://localhost:8000/indicadores/admin/listar?tipo=${categoria}`,
+    `http://192.168.68.116:8000/indicadores/admin/listar?tipo=${categoria}`,
     {
       headers: {
         accept: "application/json",

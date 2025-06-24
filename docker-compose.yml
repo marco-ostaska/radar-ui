@@ -1,6 +1,8 @@
 version: "3.9"
 
 services:
+  extra_hosts:
+    - "localhostapi:192.168.68.116"
   redis:
     image: redis:7-alpine
     container_name: radar_redis
@@ -35,4 +37,3 @@ services:
       - radar-api
     environment:
       - TZ=America/Sao_Paulo
-

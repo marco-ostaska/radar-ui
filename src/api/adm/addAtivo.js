@@ -1,5 +1,5 @@
 export async function adicionarAtivo(tipo, ticker) {
-  const url = `http://localhost:8000/indicadores/admin/adicionar?tipo=${encodeURIComponent(tipo)}&ticker=${encodeURIComponent(ticker)}`;
+  const url = `${"http://192.168.68.116:8000"}/indicadores/admin/adicionar?tipo=${encodeURIComponent(tipo)}&ticker=${encodeURIComponent(ticker)}`;
 
   const res = await fetch(url, {
     method: "POST",

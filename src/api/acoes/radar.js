@@ -1,5 +1,5 @@
 export async function fetchRadarAcao(ticker, force = false) {
-  const url = `http://localhost:8000/acoes/radar?ticker=${encodeURIComponent(
+  const url = `${"http://192.168.68.116:8000"}/acoes/radar?ticker=${encodeURIComponent(
     ticker
   )}&force=${force}`;
 
