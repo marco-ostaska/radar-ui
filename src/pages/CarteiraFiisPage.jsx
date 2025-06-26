@@ -465,6 +465,7 @@ export default function CarteiraFiisPage() {
                   DY <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
+              <TableHead>P/VP</TableHead>
               <TableHead>
                 <button
                   onClick={() =>
@@ -501,7 +502,6 @@ export default function CarteiraFiisPage() {
                   % Ideal <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
-              <TableHead>P/VP</TableHead>
               <TableHead>
                 <button
                   onClick={() =>
@@ -559,7 +559,14 @@ export default function CarteiraFiisPage() {
                 <TableCell>
                   {formatCurrency(fii.rendimento_mensal_estimado)}
                 </TableCell>
-                <TableCell>{formatPercent(fii.dy)}</TableCell>
+                <TableCell>
+                  {(() => {
+                    // Debug: veja o valor real de fii.dy
+                    // Remova o console.log depois de depurar
+                    console.log("DY do FII", fii.ticker, fii.dy);
+                    return formatPercent(fii.dy);
+                  })()}
+                </TableCell>
                 <TableCell>{fii.pvp.toFixed(2)}</TableCell>
                 <TableCell>
                   <Button
@@ -632,8 +639,9 @@ export default function CarteiraFiisPage() {
             <Button
               className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 shadow"
               onClick={async () => {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
                 await fetch(
-                  `http://localhost:8000/carteira/fii/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/fii/nota?carteira_id=1&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }
