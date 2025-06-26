@@ -357,11 +357,31 @@ export default function CarteiraAcoesPage() {
                   Saldo <ArrowUpDown className="h-3 w-3 inline" />
                 </button>
               </TableHead>
-              <TableHead>Nota</TableHead>
-              <TableHead>% Carteira</TableHead>
-              <TableHead>% Ideal</TableHead>
-              <TableHead>Valor Aportar</TableHead>
-              <TableHead>Aportar</TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("nota")}>
+                  Nota <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("porcentagem_carteira")}>
+                  % Carteira <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("porcentagem_ideal")}>
+                  % Ideal <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("valor_aportar")}>
+                  Valor Aportar <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button onClick={() => handleSort("aportar")}>
+                  Aportar <ArrowUpDown className="h-3 w-3 inline" />
+                </button>
+              </TableHead>
               <TableHead>
                 <button onClick={() => handleSort("recomendacao")}>
                   Recomendação <ArrowUpDown className="h-3 w-3 inline" />
@@ -402,8 +422,26 @@ export default function CarteiraAcoesPage() {
                 </TableCell>
                 <TableCell>{acao.porcentagem_carteira != null ? `${acao.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
                 <TableCell>{acao.porcentagem_ideal != null ? `${acao.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
-                <TableCell>{acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : formatCurrency(0)}</TableCell>
-                <TableCell>{acao.aportar ? "Sim" : "Não"}</TableCell>
+                <TableCell
+                  className={
+                    acao.valor_aportar > 0
+                      ? "text-green-600 font-semibold"
+                      : acao.valor_aportar < 0
+                      ? "text-red-600 font-semibold"
+                      : ""
+                  }
+                >
+                  {acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : formatCurrency(0)}
+                </TableCell>
+                <TableCell
+                  className={
+                    acao.aportar
+                      ? "text-green-600 font-semibold"
+                      : "text-red-600 font-semibold"
+                  }
+                >
+                  {acao.aportar ? "Sim" : "Não"}
+                </TableCell>
                 <TableCell>
                   <Badge className={getRecomendacaoColor(acao.recomendacao)}>
                     {acao.recomendacao}
