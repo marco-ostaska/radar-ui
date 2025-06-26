@@ -180,9 +180,11 @@ export default function Carteira() {
             </TableHead>
             <TableHead>Valor Investido</TableHead>
             <TableHead>Saldo</TableHead>
-            <TableHead>Lucro Latente</TableHead>
-            <TableHead>Excesso P/L</TableHead>
-            <TableHead>Excesso DY</TableHead>
+            <TableHead>Nota</TableHead>
+            <TableHead>% Carteira</TableHead>
+            <TableHead>% Ideal</TableHead>
+            <TableHead>Valor Aportar</TableHead>
+            <TableHead>Aportar</TableHead>
             <TableHead>
               <SortButton columnKey="recomendacao">Recomendação</SortButton>
             </TableHead>
@@ -204,27 +206,11 @@ export default function Carteira() {
               </TableCell>
               <TableCell>{formatCurrency(acao.valor_investido)}</TableCell>
               <TableCell>{formatCurrency(acao.saldo)}</TableCell>
-              <TableCell
-                className={
-                  acao.lucro_latente >= 0 ? "text-green-600" : "text-red-600"
-                }
-              >
-                {formatPercent(acao.lucro_latente)}
-              </TableCell>
-              <TableCell
-                className={
-                  acao.excesso_pl >= 0 ? "text-green-600" : "text-red-600"
-                }
-              >
-                {formatPercent(acao.excesso_pl)}
-              </TableCell>
-              <TableCell
-                className={
-                  acao.excesso_dy >= 0 ? "text-green-600" : "text-red-600"
-                }
-              >
-                {formatPercent(acao.excesso_dy)}
-              </TableCell>
+              <TableCell>{acao.nota != null ? acao.nota : 0}</TableCell>
+              <TableCell>{acao.porcentagem_carteira != null ? `${acao.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
+              <TableCell>{acao.porcentagem_ideal != null ? `${acao.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
+              <TableCell>{acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : formatCurrency(0)}</TableCell>
+              <TableCell>{acao.aportar ? "Sim" : "Não"}</TableCell>
               <TableCell>
                 <Badge className={getRecomendacaoColor(acao.recomendacao)}>
                   {acao.recomendacao}

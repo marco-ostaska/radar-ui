@@ -355,6 +355,11 @@ export default function CarteiraAcoesPage() {
                   Saldo <ArrowUpDown className="h-3 w-3 inline" />
                 </button>
               </TableHead>
+              <TableHead>Nota</TableHead>
+              <TableHead>% Carteira</TableHead>
+              <TableHead>% Ideal</TableHead>
+              <TableHead>Valor Aportar</TableHead>
+              <TableHead>Aportar</TableHead>
               <TableHead>
                 <button onClick={() => handleSort("recomendacao")}>
                   Recomendação <ArrowUpDown className="h-3 w-3 inline" />
@@ -378,6 +383,11 @@ export default function CarteiraAcoesPage() {
                 </TableCell>
                 <TableCell>{formatCurrency(acao.valor_investido)}</TableCell>
                 <TableCell>{formatCurrency(acao.saldo)}</TableCell>
+                <TableCell>{acao.nota ?? "-"}</TableCell>
+                <TableCell>{acao.porcentagem_carteira != null ? `${acao.porcentagem_carteira.toFixed(2)}%` : "-"}</TableCell>
+                <TableCell>{acao.porcentagem_ideal != null ? `${acao.porcentagem_ideal.toFixed(2)}%` : "-"}</TableCell>
+                <TableCell>{acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : "-"}</TableCell>
+                <TableCell>{acao.aportar ? "Sim" : "Não"}</TableCell>
                 <TableCell>
                   <Badge className={getRecomendacaoColor(acao.recomendacao)}>
                     {acao.recomendacao}
