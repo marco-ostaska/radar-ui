@@ -250,51 +250,68 @@ export default function Transacoes() {
   if (loading) return <div className="p-4">Carregando transações...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
-  const TabelaTransacoes = ({ transacoes, tipo }) => (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Ticker</TableHead>
-            <TableHead>Data</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Preço</TableHead>
-            <TableHead>Quantidade</TableHead>
-            <TableHead>Valor Total</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transacoes.map((transacao) => (
-            <TableRow key={transacao.id}>
-              <TableCell className="font-medium">{transacao.ticker}</TableCell>
-              <TableCell>{formatDate(transacao.data)}</TableCell>
-              <TableCell>{transacao.tipo}</TableCell>
-              <TableCell>{formatCurrency(transacao.preco)}</TableCell>
-              <TableCell>{transacao.quantidade}</TableCell>
-              <TableCell>{formatCurrency(transacao.valor_total)}</TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleEdit(transacao, tipo)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(transacao.id, tipo)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+  const TabelaTransacoes = ({ transacoes, tipo }) => {
+    const [search, setSearch] = useState("");
+    const filteredTransacoes = transacoes.filter((transacao) =>
+      transacao.ticker.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+      <div>
+        <div className="mb-2 flex justify-end">
+          <Input
+            placeholder="Buscar ativo..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-64"
+          />
+        </div>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Ticker</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Preço</TableHead>
+                <TableHead>Quantidade</TableHead>
+                <TableHead>Valor Total</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredTransacoes.map((transacao) => (
+                <TableRow key={transacao.id}>
+                  <TableCell className="font-medium">{transacao.ticker}</TableCell>
+                  <TableCell>{formatDate(transacao.data)}</TableCell>
+                  <TableCell>{transacao.tipo}</TableCell>
+                  <TableCell>{formatCurrency(transacao.preco)}</TableCell>
+                  <TableCell>{transacao.quantidade}</TableCell>
+                  <TableCell>{formatCurrency(transacao.valor_total)}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(transacao, tipo)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(transacao.id, tipo)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="container mx-auto p-4">
