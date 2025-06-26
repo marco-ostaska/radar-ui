@@ -210,10 +210,9 @@ export default function Carteira() {
               <TableCell>{formatCurrency(acao.saldo)}</TableCell>
               <TableCell>
                 <Button
-                  variant="link"
-                  className="p-0 h-auto text-blue-600 underline"
+                  variant="ghost"
+                  className="p-0 h-auto text-base font-normal cursor-pointer bg-transparent shadow-none hover:bg-gray-100 focus:ring-2 focus:ring-blue-300"
                   onClick={() => {
-                    console.log('Clicou na nota:', acao.ticker);
                     setNotaDialog({
                       open: true,
                       ticker: acao.ticker,
