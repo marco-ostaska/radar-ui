@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   extra_hosts:
-    - "localhostapi:192.168.68.116"
+    - "localhostapi:127.0.0.1"
   redis:
     image: redis:7-alpine
     container_name: radar_redis

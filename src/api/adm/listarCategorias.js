@@ -1,5 +1,5 @@
 export async function listarCategorias() {
-  const response = await fetch(`${"http://192.168.68.116:8000"}/indicadores/admin/categorias`, {
+  const response = await fetch(`${(process.env.SERVER_HOST || "http://localhost:8000")}/indicadores/admin/categorias`, {
     headers: {
       accept: "application/json",
     },

@@ -97,7 +97,7 @@ export default function AddAtivoPage() {
   const mutation = useMutation({
     mutationFn: async ({ categoria, ativo }) => {
       const res = await fetch(
-        `http://192.168.68.116:8000/indicadores/admin/adicionar?tipo=${categoria}&ticker=${ativo.toUpperCase()}`,
+        `${(process.env.SERVER_HOST || "http://localhost:8000")}/indicadores/admin/adicionar?tipo=${categoria}&ticker=${ativo.toUpperCase()}`,
         { method: "POST" }
       );
       if (!res.ok) {

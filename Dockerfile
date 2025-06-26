@@ -4,6 +4,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
+ARG SERVER_HOST=http://localhost:8000
+ENV SERVER_HOST=$SERVER_HOST
 RUN npm install
 
 COPY . .

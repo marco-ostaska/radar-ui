@@ -1,5 +1,5 @@
 export async function removerAtivo(tipo, ticker) {
-  const url = `${"http://192.168.68.116:8000"}/indicadores/admin/remover?tipo=${encodeURIComponent(tipo)}&ticker=${encodeURIComponent(ticker)}`;
+  const url = `${(process.env.SERVER_HOST || "http://localhost:8000")}/indicadores/admin/remover?tipo=${encodeURIComponent(tipo)}&ticker=${encodeURIComponent(ticker)}`;
 
   const res = await fetch(url, {
     method: "DELETE",
