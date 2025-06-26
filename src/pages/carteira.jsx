@@ -295,9 +295,24 @@ export default function Carteira() {
             </TableHead>
             <TableHead>Valor Investido</TableHead>
             <TableHead>Saldo</TableHead>
+            <TableHead>
+              <SortButton columnKey="nota">Nota</SortButton>
+            </TableHead>
+            <TableHead>
+              <SortButton columnKey="porcentagem_carteira">% Carteira</SortButton>
+            </TableHead>
+            <TableHead>
+              <SortButton columnKey="porcentagem_ideal">% Ideal</SortButton>
+            </TableHead>
             <TableHead>Rendimento Mensal</TableHead>
             <TableHead>DY</TableHead>
             <TableHead>P/VP</TableHead>
+            <TableHead>
+              <SortButton columnKey="valor_aportar">Valor Aportar</SortButton>
+            </TableHead>
+            <TableHead>
+              <SortButton columnKey="aportar">Aportar</SortButton>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -317,14 +332,87 @@ export default function Carteira() {
               <TableCell>{formatCurrency(fii.valor_investido)}</TableCell>
               <TableCell>{formatCurrency(fii.saldo)}</TableCell>
               <TableCell>
-                {formatCurrency(fii.rendimento_mensal_estimado)}
+                <Button
+                  variant="ghost"
+                  className="p-0 h-auto text-base font-normal cursor-pointer bg-transparent shadow-none hover:bg-gray-100 focus:ring-2 focus:ring-blue-300"
+                  onClick={() => {
+                    setNotaDialog({
+                      open: true,
+                      ticker: fii.ticker,
+                      nota: fii.nota != null ? fii.nota : 0,
+                    });
+                  }}
+                >
+                  {fii.nota != null ? fii.nota : 0}
+                </Button>
               </TableCell>
+              <TableCell>{fii.porcentagem_carteira != null ? `${fii.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
+              <TableCell>{fii.porcentagem_ideal != null ? `${fii.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
+              <TableCell>{formatCurrency(fii.rendimento_mensal_estimado)}</TableCell>
               <TableCell>{formatPercent(fii.dy)}</TableCell>
               <TableCell>{fii.pvp.toFixed(2)}</TableCell>
+              <TableCell
+                className={
+                  fii.valor_aportar > 0
+                    ? "text-green-600 font-semibold"
+                    : fii.valor_aportar < 0
+                    ? "text-red-600 font-semibold"
+                    : ""
+                }
+              >
+                {fii.valor_aportar != null ? formatCurrency(fii.valor_aportar) : formatCurrency(0)}
+              </TableCell>
+              <TableCell
+                className={
+                  fii.aportar
+                    ? "text-green-600 font-semibold"
+                    : "text-red-600 font-semibold"
+                }
+              >
+                {fii.aportar ? "Sim" : "Não"}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      {/* Dialog fora da tabela para evitar problemas de foco/click */}
+      <Dialog open={notaDialog.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Editar Nota</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Nota (0 a 100)</label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={notaDialog.nota}
+              onChange={(e) =>
+                setNotaDialog((prev) => ({
+                  ...prev,
+                  nota: Math.max(0, Math.min(100, Number(e.target.value))),
+                }))
+              }
+            />
+            <Button
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={async () => {
+                await fetch(
+                  `http://localhost:8000/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                    notaDialog.ticker
+                  )}&nota=${notaDialog.nota}`,
+                  { method: "POST" }
+                );
+                setNotaDialog({ open: false, ticker: null, nota: 0 });
+                loadCarteira();
+              }}
+            >
+              Salvar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 

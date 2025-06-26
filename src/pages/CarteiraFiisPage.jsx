@@ -40,6 +40,7 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CarteiraFiisPage() {
+  const [notaDialog, setNotaDialog] = useState({ open: false, ticker: null, nota: 0 });
   const [totals, setTotals] = useState({
     totalInvestido: 0,
     totalSaldo: 0,
@@ -464,7 +465,67 @@ export default function CarteiraFiisPage() {
                   DY <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "nota",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Nota <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "porcentagem_carteira",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  % Carteira <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "porcentagem_ideal",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  % Ideal <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
               <TableHead>P/VP</TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "valor_aportar",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Valor Aportar <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() =>
+                    setSortConfig((prev) => ({
+                      key: "aportar",
+                      direction: prev.direction === "asc" ? "desc" : "asc",
+                    }))
+                  }
+                >
+                  Aportar <ArrowUpDown className="h-4 w-4 inline" />
+                </button>
+              </TableHead>
               <TableHead>
                 <button
                   onClick={() =>
@@ -501,6 +562,43 @@ export default function CarteiraFiisPage() {
                 <TableCell>{formatPercent(fii.dy)}</TableCell>
                 <TableCell>{fii.pvp.toFixed(2)}</TableCell>
                 <TableCell>
+                  <Button
+                    variant="ghost"
+                    className="p-0 h-auto text-base font-normal cursor-pointer bg-transparent shadow-none hover:bg-gray-100 focus:ring-2 focus:ring-blue-300"
+                    onClick={() => {
+                      setNotaDialog({
+                        open: true,
+                        ticker: fii.ticker,
+                        nota: fii.nota != null ? fii.nota : 0,
+                      });
+                    }}
+                  >
+                    {fii.nota != null ? fii.nota : 0}
+                  </Button>
+                </TableCell>
+                <TableCell>{fii.porcentagem_carteira != null ? `${fii.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
+                <TableCell>{fii.porcentagem_ideal != null ? `${fii.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
+                <TableCell
+                  className={
+                    fii.valor_aportar > 0
+                      ? "text-green-600 font-semibold"
+                      : fii.valor_aportar < 0
+                      ? "text-red-600 font-semibold"
+                      : ""
+                  }
+                >
+                  {fii.valor_aportar != null ? formatCurrency(fii.valor_aportar) : formatCurrency(0)}
+                </TableCell>
+                <TableCell
+                  className={
+                    fii.aportar
+                      ? "text-green-600 font-semibold"
+                      : "text-red-600 font-semibold"
+                  }
+                >
+                  {fii.aportar ? "Sim" : "Não"}
+                </TableCell>
+                <TableCell>
                   <Badge className={getRecomendacaoColor(fii.recomendacao)}>
                     {fii.recomendacao}
                   </Badge>
@@ -510,6 +608,45 @@ export default function CarteiraFiisPage() {
           </TableBody>
         </Table>
       </div>
+      {/* Dialog para editar nota */}
+      <Dialog open={notaDialog?.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+        <DialogContent className="bg-white rounded-xl shadow-2xl p-8 max-w-sm mx-auto flex flex-col items-center gap-6">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold mb-2">Editar Nota</DialogTitle>
+          </DialogHeader>
+          <div className="w-full flex flex-col items-center gap-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nota (0 a 100)</label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={notaDialog.nota}
+              className="w-32 text-center text-lg border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              onChange={(e) =>
+                setNotaDialog((prev) => ({
+                  ...prev,
+                  nota: Math.max(0, Math.min(100, Number(e.target.value))),
+                }))
+              }
+            />
+            <Button
+              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 shadow"
+              onClick={async () => {
+                await fetch(
+                  `http://localhost:8000/carteira/fii/nota?carteira_id=1&ticker=${encodeURIComponent(
+                    notaDialog.ticker
+                  )}&nota=${notaDialog.nota}`,
+                  { method: "POST" }
+                );
+                setNotaDialog({ open: false, ticker: null, nota: 0 });
+                loadCarteira();
+              }}
+            >
+              Salvar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
