@@ -58,6 +58,8 @@ export default function Carteira() {
     ativoTipo: "acao",
   });
 
+  const [notaDialog, setNotaDialog] = useState({ open: false, ticker: null, nota: 0 });
+
   useEffect(() => {
     loadCarteira();
   }, []);
@@ -206,7 +208,22 @@ export default function Carteira() {
               </TableCell>
               <TableCell>{formatCurrency(acao.valor_investido)}</TableCell>
               <TableCell>{formatCurrency(acao.saldo)}</TableCell>
-              <TableCell>{acao.nota != null ? acao.nota : 0}</TableCell>
+              <TableCell>
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-blue-600 underline"
+                  onClick={() => {
+                    console.log('Clicou na nota:', acao.ticker);
+                    setNotaDialog({
+                      open: true,
+                      ticker: acao.ticker,
+                      nota: acao.nota != null ? acao.nota : 0,
+                    });
+                  }}
+                >
+                  {acao.nota != null ? acao.nota : 0}
+                </Button>
+              </TableCell>
               <TableCell>{acao.porcentagem_carteira != null ? `${acao.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
               <TableCell>{acao.porcentagem_ideal != null ? `${acao.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
               <TableCell>{acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : formatCurrency(0)}</TableCell>
@@ -220,6 +237,44 @@ export default function Carteira() {
           ))}
         </TableBody>
       </Table>
+      {/* Dialog fora da tabela para evitar problemas de foco/click */}
+      <Dialog open={notaDialog.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Editar Nota</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Nota (0 a 100)</label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={notaDialog.nota}
+              onChange={(e) =>
+                setNotaDialog((prev) => ({
+                  ...prev,
+                  nota: Math.max(0, Math.min(100, Number(e.target.value))),
+                }))
+              }
+            />
+            <Button
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={async () => {
+                await fetch(
+                  `http://localhost:8000/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                    notaDialog.ticker
+                  )}&nota=${notaDialog.nota}`,
+                  { method: "POST" }
+                );
+                setNotaDialog({ open: false, ticker: null, nota: 0 });
+                loadCarteira();
+              }}
+            >
+              Salvar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 
