@@ -355,9 +355,6 @@ export default function CarteiraAcoesPage() {
                   Saldo <ArrowUpDown className="h-3 w-3 inline" />
                 </button>
               </TableHead>
-              <TableHead>Lucro Latente</TableHead>
-              <TableHead>Excesso P/L</TableHead>
-              <TableHead>Excesso DY</TableHead>
               <TableHead>
                 <button onClick={() => handleSort("recomendacao")}>
                   Recomendação <ArrowUpDown className="h-3 w-3 inline" />
@@ -381,27 +378,6 @@ export default function CarteiraAcoesPage() {
                 </TableCell>
                 <TableCell>{formatCurrency(acao.valor_investido)}</TableCell>
                 <TableCell>{formatCurrency(acao.saldo)}</TableCell>
-                <TableCell
-                  className={
-                    acao.lucro_latente >= 0 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {formatPercent(acao.lucro_latente)}
-                </TableCell>
-                <TableCell
-                  className={
-                    acao.excesso_pl >= 0 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {formatPercent(acao.excesso_pl)}
-                </TableCell>
-                <TableCell
-                  className={
-                    acao.excesso_dy >= 0 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {formatPercent(acao.excesso_dy)}
-                </TableCell>
                 <TableCell>
                   <Badge className={getRecomendacaoColor(acao.recomendacao)}>
                     {acao.recomendacao}

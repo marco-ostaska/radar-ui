@@ -1,4 +1,4 @@
-const API_URL = process.env.SERVER_HOST || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_SERVER_HOST || "http://localhost:8000";
 
 export const fetchCarteira = async (carteiraId = 1) => {
   try {

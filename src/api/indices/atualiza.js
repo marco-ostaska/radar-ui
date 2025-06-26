@@ -1,9 +1,9 @@
 // src/api/indices/atualiza.js
 
 export async function fetchIndices(force = false) {
-  console.log("API_URL:", process.env.API_URL);
+  // console.log("API_URL:", import.meta.env.VITE_SERVER_HOST);
   const res = await fetch(
-    `${(process.env.SERVER_HOST || "http://localhost:8000")}/indices/atualiza?force=${force}`
+    `${(import.meta.env.VITE_SERVER_HOST || "http://localhost:8000")}/indices/atualiza?force=${force}`
   );
   if (!res.ok) throw new Error("Erro ao buscar índices");
   const data = await res.json();
