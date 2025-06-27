@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -72,28 +72,26 @@ export default function CarteiraFiisPage() {
     loadCarteira();
   }, []);
 
-  useEffect(() => {
-    setCarteiraFiis((prev) =>
-      sortData(prev, sortConfig.key, sortConfig.direction)
+  // Filtra e ordena fiis pelo ticker digitado e sortConfig
+  const filteredFiis = useMemo(() => {
+    const filtered = carteiraFiis.filter((fii) =>
+      fii.ticker.toLowerCase().includes(searchTicker.toLowerCase())
     );
-  }, [sortConfig]);
-
-  const sortData = (data, key, direction) => {
-    if (!key) return data;
-    return [...data].sort((a, b) => {
-      const aValue = key === "variacao" ? a[key] || 0 : a[key];
-      const bValue = key === "variacao" ? b[key] || 0 : b[key];
-      if (aValue < bValue) return direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+    if (!sortConfig.key) return filtered;
+    return [...filtered].sort((a, b) => {
+      const aValue = sortConfig.key === "variacao" ? a[sortConfig.key] || 0 : a[sortConfig.key];
+      const bValue = sortConfig.key === "variacao" ? b[sortConfig.key] || 0 : b[sortConfig.key];
+      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
-  };
+  }, [carteiraFiis, searchTicker, sortConfig]);
 
   const loadCarteira = async () => {
     try {
       setLoading(true);
       const fiis = await fetchCarteiraFiis();
-      setCarteiraFiis(sortData(fiis, sortConfig.key, sortConfig.direction));
+      setCarteiraFiis(fiis);
       // Calculate totals
       const totalInvestido = fiis.reduce(
         (sum, fii) => sum + fii.valor_investido,
@@ -206,11 +204,6 @@ export default function CarteiraFiisPage() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
-  // Filtra fiis pelo ticker digitado
-  const filteredFiis = carteiraFiis.filter((fii) =>
-    fii.ticker.toLowerCase().includes(searchTicker.toLowerCase())
-  );
 
   return (
     <div className="container mx-auto p-4">
