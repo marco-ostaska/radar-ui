@@ -221,3 +221,129 @@ export const deletarTransacaoFiis = async (id, carteiraId = 1) => {
     throw error;
   }
 };
+
+// Agrupamento e Desdobramento para FIIs e Ações
+
+export const agrupamentoFii = async (params) => {
+  try {
+    const queryParams = new URLSearchParams({
+      ticker: params.ticker,
+      data_agrupamento: params.data_agrupamento,
+      proporcao_antes: params.proporcao_antes,
+      proporcao_depois: params.proporcao_depois,
+      carteira_id: params.carteira_id,
+    });
+
+    const response = await fetch(
+      `${API_URL}/transacoes/fii/agrupamento?${queryParams}`,
+      {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao registrar agrupamento de FII:", error);
+    throw error;
+  }
+};
+
+export const agrupamentoAcoes = async (params) => {
+  try {
+    const queryParams = new URLSearchParams({
+      ticker: params.ticker,
+      data_agrupamento: params.data_agrupamento,
+      proporcao_antes: params.proporcao_antes,
+      proporcao_depois: params.proporcao_depois,
+      carteira_id: params.carteira_id,
+    });
+
+    const response = await fetch(
+      `${API_URL}/transacoes/acoes/agrupamento?${queryParams}`,
+      {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao registrar agrupamento de ações:", error);
+    throw error;
+  }
+};
+
+export const desdobramentoAcoes = async (params) => {
+  try {
+    const queryParams = new URLSearchParams({
+      ticker: params.ticker,
+      data_desdobramento: params.data_desdobramento,
+      proporcao_antes: params.proporcao_antes,
+      proporcao_depois: params.proporcao_depois,
+      carteira_id: params.carteira_id,
+    });
+
+    const response = await fetch(
+      `${API_URL}/transacoes/acoes/desdobramento?${queryParams}`,
+      {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao registrar desdobramento de ações:", error);
+    throw error;
+  }
+};
+
+export const desdobramentoFii = async (params) => {
+  try {
+    const queryParams = new URLSearchParams({
+      ticker: params.ticker,
+      data_desdobramento: params.data_desdobramento,
+      proporcao_antes: params.proporcao_antes,
+      proporcao_depois: params.proporcao_depois,
+      carteira_id: params.carteira_id,
+    });
+
+    const response = await fetch(
+      `${API_URL}/transacoes/fii/desdobramento?${queryParams}`,
+      {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao registrar desdobramento de FII:", error);
+    throw error;
+  }
+};
