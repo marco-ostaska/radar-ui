@@ -289,13 +289,15 @@ export default function Transacoes() {
                   <TableCell>{transacao.quantidade}</TableCell>
                   <TableCell>{formatCurrency(transacao.valor_total)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(transacao, tipo)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    {!(["desdobramento", "agrupamento"].includes(transacao.tipo?.toLowerCase())) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(transacao, tipo)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
