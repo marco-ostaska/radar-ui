@@ -1,5 +1,5 @@
 export async function adicionarAtivo(tipo, ticker) {
-  const url = `http://localhost:8000/indicadores/admin/adicionar?tipo=${encodeURIComponent(tipo)}&ticker=${encodeURIComponent(ticker)}`;
+  const url = `${(import.meta.env.VITE_SERVER_HOST || "http://localhost:8000")}/indicadores/admin/adicionar?tipo=${encodeURIComponent(tipo)}&ticker=${encodeURIComponent(ticker)}`;
 
   const res = await fetch(url, {
     method: "POST",

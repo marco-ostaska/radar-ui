@@ -1,5 +1,5 @@
 export async function listarCategorias() {
-  const response = await fetch("http://localhost:8000/indicadores/admin/categorias", {
+  const response = await fetch(`${(import.meta.env.VITE_SERVER_HOST || "http://localhost:8000")}/indicadores/admin/categorias`, {
     headers: {
       accept: "application/json",
     },

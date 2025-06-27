@@ -1,5 +1,5 @@
 import App from "@/App";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 
 import ListaFiisPage from "@/pages/ListaFiisPage";
 import ListaAcoesPage from "@/pages/ListaAcoesPage";
@@ -11,6 +11,9 @@ import RadarFiisPage from "@/pages/RadarFiisPage";
 import RadarFIIsDia from "@/pages/RadarFIIsDia";
 import BuscaAcoesPage from "@/pages/BuscaAcoesPage";
 import BuscaFIIsPage from "@/pages/BuscaFIIsPage";
+import CarteiraAcoesPage from "@/pages/CarteiraAcoesPage";
+import CarteiraFiisPage from "@/pages/CarteiraFiisPage";
+import TransacoesPage from "@/pages/transacoes";
 
 export const router = createBrowserRouter([
   {
@@ -27,8 +30,9 @@ export const router = createBrowserRouter([
       { path: "radar/fii/dia", element: <RadarFIIsDia /> },
       { path: "busca/acoes/", element: <BuscaAcoesPage /> },
       { path: "busca/fii/", element: <BuscaFIIsPage /> },
-
-      // { path: "radar/acoes", element: <RadarAcoesPage /> },
+      { path: "carteira/acoes", element: <CarteiraAcoesPage /> },
+      { path: "carteira/fiis", element: <CarteiraFiisPage /> },
+      { path: "transacoes", element: <TransacoesPage /> },
     ],
   },
 ]);

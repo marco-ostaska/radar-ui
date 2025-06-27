@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  extra_hosts:
+    - "localhostapi:127.0.0.1"
+  redis:
+    image: redis:7-alpine
+    container_name: radar_redis
+    ports:
+      - "6379:6379"
+    environment:
+      - TZ=America/Sao_Paulo
+
+
+  radar-api:
+    image: marcoan/radar-api:wip
+    container_name: radar_api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - TZ=America/Sao_Paulo
+    volumes:
+      - /home/marcoan/git/github.com/marco-ostaska/radar-db:/radar/sqlite # Volume persistente para o SQLite
+    depends_on:
+      - redis
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  radar-ui:
+    image: marcoan/radar-ui:wip
+    container_name: radar_ui
+    ports:
+      - "5173:80"
+    depends_on:
+      - radar-api
+    environment:
+      - TZ=America/Sao_Paulo

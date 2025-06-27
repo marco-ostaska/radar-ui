@@ -5,6 +5,7 @@ import {
   Settings,
   List,
   BadgeDollarSign,
+  History,
 } from "lucide-react";
 import {
   Sidebar,
@@ -53,6 +54,16 @@ const groups = [
     items: [
       { id: "acoes-dia", title: "Ações", href: "/radar/acoes/dia" },
       { id: "fiis-dia", title: "FIIs", href: "/radar/fii/dia" },
+    ],
+  },
+  {
+    id: "carteira",
+    icon: Wallet,
+    title: "Carteira",
+    items: [
+      { id: "carteira-acoes", title: "Carteira de Ações", href: "/carteira/acoes" },
+      { id: "carteira-fiis", title: "Carteira de FIIs", href: "/carteira/fiis" },
+      { id: "transacoes", title: "Transações", href: "/transacoes" },
     ],
   },
   {
@@ -124,6 +135,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        {/* Removed duplicate Carteira button */}
       </SidebarContent>
       <SidebarFooter className="bg-slate-300 px-4 py-4 text-sm">
         <div className="flex flex-col gap-3">
