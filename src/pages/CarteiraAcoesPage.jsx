@@ -445,8 +445,15 @@ export default function CarteiraAcoesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAcoes.map((acao) => (
-              <TableRow key={acao.ticker}>
+            {filteredAcoes.map((acao, idx) => (
+              <TableRow
+                key={acao.ticker}
+                className={
+                  idx % 2 === 0
+                    ? "bg-white border-b border-gray-100"
+                    : "bg-gray-50 border-b border-gray-100"
+                }
+              >
                 <TableCell className="font-medium">{acao.ticker}</TableCell>
                 <TableCell>{acao.quantidade}</TableCell>
                 <TableCell>{formatCurrency(acao.preco_medio)}</TableCell>
