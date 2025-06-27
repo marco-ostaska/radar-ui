@@ -477,7 +477,8 @@ export default function CarteiraAcoesPage() {
             <Button
               className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 shadow"
               onClick={async () => {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+                const API_URL =
+                  import.meta.env.VITE_SERVER_HOST || "http://localhost:8000";
                 await fetch(
                   `${API_URL}/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
                     notaDialog.ticker

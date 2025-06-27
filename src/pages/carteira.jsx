@@ -43,6 +43,8 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const API_URL = import.meta.env.VITE_SERVER_HOST || "http://localhost:8000";
+
 export default function Carteira() {
   const [carteiraAcoes, setCarteiraAcoes] = useState([]);
   const [carteiraFiis, setCarteiraFiis] = useState([]);
@@ -58,7 +60,11 @@ export default function Carteira() {
     ativoTipo: "acao",
   });
 
-  const [notaDialog, setNotaDialog] = useState({ open: false, ticker: null, nota: 0 });
+  const [notaDialog, setNotaDialog] = useState({
+    open: false,
+    ticker: null,
+    nota: 0,
+  });
 
   useEffect(() => {
     loadCarteira();
@@ -223,9 +229,21 @@ export default function Carteira() {
                   {acao.nota != null ? acao.nota : 0}
                 </Button>
               </TableCell>
-              <TableCell>{acao.porcentagem_carteira != null ? `${acao.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
-              <TableCell>{acao.porcentagem_ideal != null ? `${acao.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
-              <TableCell>{acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : formatCurrency(0)}</TableCell>
+              <TableCell>
+                {acao.porcentagem_carteira != null
+                  ? `${acao.porcentagem_carteira.toFixed(2)}%`
+                  : "0.00%"}
+              </TableCell>
+              <TableCell>
+                {acao.porcentagem_ideal != null
+                  ? `${acao.porcentagem_ideal.toFixed(2)}%`
+                  : "0.00%"}
+              </TableCell>
+              <TableCell>
+                {acao.valor_aportar != null
+                  ? formatCurrency(acao.valor_aportar)
+                  : formatCurrency(0)}
+              </TableCell>
               <TableCell>{acao.aportar ? "Sim" : "Não"}</TableCell>
               <TableCell>
                 <Badge className={getRecomendacaoColor(acao.recomendacao)}>
@@ -237,13 +255,18 @@ export default function Carteira() {
         </TableBody>
       </Table>
       {/* Dialog fora da tabela para evitar problemas de foco/click */}
-      <Dialog open={notaDialog.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+      <Dialog
+        open={notaDialog.open}
+        onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}
+      >
         <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>Editar Nota</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Nota (0 a 100)</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Nota (0 a 100)
+            </label>
             <Input
               type="number"
               min={0}
@@ -260,7 +283,7 @@ export default function Carteira() {
               className="bg-blue-600 hover:bg-blue-700"
               onClick={async () => {
                 await fetch(
-                  `http://localhost:8000/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }
@@ -299,7 +322,9 @@ export default function Carteira() {
               <SortButton columnKey="nota">Nota</SortButton>
             </TableHead>
             <TableHead>
-              <SortButton columnKey="porcentagem_carteira">% Carteira</SortButton>
+              <SortButton columnKey="porcentagem_carteira">
+                % Carteira
+              </SortButton>
             </TableHead>
             <TableHead>
               <SortButton columnKey="porcentagem_ideal">% Ideal</SortButton>
@@ -346,9 +371,19 @@ export default function Carteira() {
                   {fii.nota != null ? fii.nota : 0}
                 </Button>
               </TableCell>
-              <TableCell>{fii.porcentagem_carteira != null ? `${fii.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
-              <TableCell>{fii.porcentagem_ideal != null ? `${fii.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
-              <TableCell>{formatCurrency(fii.rendimento_mensal_estimado)}</TableCell>
+              <TableCell>
+                {fii.porcentagem_carteira != null
+                  ? `${fii.porcentagem_carteira.toFixed(2)}%`
+                  : "0.00%"}
+              </TableCell>
+              <TableCell>
+                {fii.porcentagem_ideal != null
+                  ? `${fii.porcentagem_ideal.toFixed(2)}%`
+                  : "0.00%"}
+              </TableCell>
+              <TableCell>
+                {formatCurrency(fii.rendimento_mensal_estimado)}
+              </TableCell>
               <TableCell>{formatPercent(fii.dy)}</TableCell>
               <TableCell>{fii.pvp.toFixed(2)}</TableCell>
               <TableCell
@@ -360,7 +395,9 @@ export default function Carteira() {
                     : ""
                 }
               >
-                {fii.valor_aportar != null ? formatCurrency(fii.valor_aportar) : formatCurrency(0)}
+                {fii.valor_aportar != null
+                  ? formatCurrency(fii.valor_aportar)
+                  : formatCurrency(0)}
               </TableCell>
               <TableCell
                 className={
@@ -376,13 +413,18 @@ export default function Carteira() {
         </TableBody>
       </Table>
       {/* Dialog fora da tabela para evitar problemas de foco/click */}
-      <Dialog open={notaDialog.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+      <Dialog
+        open={notaDialog.open}
+        onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}
+      >
         <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>Editar Nota</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Nota (0 a 100)</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Nota (0 a 100)
+            </label>
             <Input
               type="number"
               min={0}
@@ -399,7 +441,7 @@ export default function Carteira() {
               className="bg-blue-600 hover:bg-blue-700"
               onClick={async () => {
                 await fetch(
-                  `http://localhost:8000/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }
