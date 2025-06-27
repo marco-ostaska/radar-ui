@@ -262,6 +262,18 @@ export default function Transacoes() {
     return date;
   }
 
+  function formatDateToDDMMYYYY(dateStr) {
+    if (!dateStr) return "";
+    // Se já estiver em dd/MM/yyyy, retorna direto
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+    // Se vier como yyyy-MM-dd, converte
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [ano, mes, dia] = dateStr.split("-");
+      return `${dia}/${mes}/${ano}`;
+    }
+    return dateStr;
+  }
+
   if (loading) return <div className="p-4">Carregando transações...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
@@ -363,7 +375,7 @@ export default function Transacoes() {
           proporcao_depois: form.proporcao_depois,
           carteira_id: 1,
           [isAgrupamento ? "data_agrupamento" : "data_desdobramento"]:
-            form.data,
+            formatDateToDDMMYYYY(form.data),
         };
         if (isAgrupamento) {
           if (form.tipoAtivo === "acao") {
