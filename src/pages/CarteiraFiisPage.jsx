@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -54,8 +54,8 @@ export default function CarteiraFiisPage() {
     totalRendimentosMensais: 0,
   });
   const [carteiraFiis, setCarteiraFiis] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [searchTicker, setSearchTicker] = useState("");
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -66,30 +66,13 @@ export default function CarteiraFiisPage() {
     data: format(new Date(), "dd/MM/yyyy"),
     ativoTipo: "fii",
   });
-  const [searchTicker, setSearchTicker] = useState("");
 
   useEffect(() => {
     loadCarteira();
   }, []);
 
-  // Filtra e ordena fiis pelo ticker digitado e sortConfig
-  const filteredFiis = useMemo(() => {
-    const filtered = carteiraFiis.filter((fii) =>
-      fii.ticker.toLowerCase().includes(searchTicker.toLowerCase())
-    );
-    if (!sortConfig.key) return filtered;
-    return [...filtered].sort((a, b) => {
-      const aValue = sortConfig.key === "variacao" ? a[sortConfig.key] || 0 : a[sortConfig.key];
-      const bValue = sortConfig.key === "variacao" ? b[sortConfig.key] || 0 : b[sortConfig.key];
-      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [carteiraFiis, searchTicker, sortConfig]);
-
   const loadCarteira = async () => {
     try {
-      setLoading(true);
       const fiis = await fetchCarteiraFiis();
       setCarteiraFiis(fiis);
       // Calculate totals
@@ -121,20 +104,8 @@ export default function CarteiraFiisPage() {
         totalRendimentosMensais,
         dyOnCost,
       });
-
-      setTotals({
-        totalInvestido,
-        totalSaldo,
-        totalVariacao,
-        totalQuantidade,
-        totalVariacaoPercent,
-        totalRendimentosMensais,
-        dyOnCost,
-      });
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -173,6 +144,28 @@ export default function CarteiraFiisPage() {
     }
   };
 
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      const direction =
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc";
+      setCarteiraFiis((prevFiis) => {
+        const sorted = [...prevFiis].sort((a, b) => {
+          let aValue = a[key];
+          let bValue = b[key];
+          if (typeof aValue === "string" && typeof bValue === "string") {
+            aValue = aValue.toLowerCase();
+            bValue = bValue.toLowerCase();
+          }
+          if (aValue < bValue) return direction === "asc" ? -1 : 1;
+          if (aValue > bValue) return direction === "asc" ? 1 : -1;
+          return 0;
+        });
+        return sorted;
+      });
+      return { key, direction };
+    });
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -188,7 +181,6 @@ export default function CarteiraFiisPage() {
     }).format(value / 100);
   };
 
-  if (loading) return <div className="p-4">Carregando carteira de FIIs...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
   const getRecomendacaoColor = (recomendacao) => {
@@ -416,24 +408,14 @@ export default function CarteiraFiisPage() {
             <TableRow>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "ticker",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("ticker")}
                 >
                   Ticker <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "quantidade",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("quantidade")}
                 >
                   Qtd <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
@@ -442,60 +424,35 @@ export default function CarteiraFiisPage() {
               <TableHead>Preço Atual</TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "variacao",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("variacao")}
                 >
                   Variação <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "valor_investido",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("valor_investido")}
                 >
                   Valor Investido <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "saldo",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("saldo")}
                 >
                   Saldo <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "rendimento_mensal_estimado",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("rendimento_mensal_estimado")}
                 >
                   Rendimento Mensal <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "dy",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("dy")}
                 >
                   DY <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
@@ -503,72 +460,42 @@ export default function CarteiraFiisPage() {
               <TableHead>P/VP</TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "nota",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("nota")}
                 >
                   Nota <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "porcentagem_carteira",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("porcentagem_carteira")}
                 >
                   % Carteira <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "porcentagem_ideal",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("porcentagem_ideal")}
                 >
                   % Ideal <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "valor_aportar",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("valor_aportar")}
                 >
                   Valor Aportar <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "aportar",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("aportar")}
                 >
                   Aportar <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "recomendacao",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("recomendacao")}
                 >
                   Recomendação <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
@@ -576,7 +503,9 @@ export default function CarteiraFiisPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredFiis.map((fii, idx) => (
+            {carteiraFiis.filter((fii) =>
+              fii.ticker.toLowerCase().includes(searchTicker.toLowerCase())
+            ).map((fii, idx) => (
               <TableRow
                 key={fii.ticker}
                 className={
