@@ -219,12 +219,6 @@ export default function CarteiraFiisPage() {
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Total Investido</span>
-            <span className="text-lg font-bold text-gray-900">
-              {formatCurrency(totals.totalInvestido)}
-            </span>
-          </div>
-          <div className="flex flex-col">
             <span className="text-sm text-gray-500">Saldo Total</span>
             <span className="text-lg font-bold text-gray-900">
               {formatCurrency(totals.totalSaldo)}
@@ -582,8 +576,15 @@ export default function CarteiraFiisPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredFiis.map((fii) => (
-              <TableRow key={fii.ticker}>
+            {filteredFiis.map((fii, idx) => (
+              <TableRow
+                key={fii.ticker}
+                className={
+                  idx % 2 === 0
+                    ? "bg-white border-b border-gray-100"
+                    : "bg-gray-50 border-b border-gray-100"
+                }
+              >
                 <TableCell className="font-medium">{fii.ticker}</TableCell>
                 <TableCell>{fii.quantidade}</TableCell>
                 <TableCell>{formatCurrency(fii.preco_medio)}</TableCell>
