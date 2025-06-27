@@ -324,15 +324,15 @@ export default function Transacoes() {
 
     return (
       <div>
-        <div className="mb-2 flex justify-between gap-2 items-center">
+        <div className="mb-4 flex flex-col sm:flex-row justify-between gap-2 items-center px-4 pt-4">
           <Input
             placeholder="Buscar ativo..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-64"
+            className="w-full sm:w-64 bg-gray-50 border-gray-300 focus:ring-blue-200"
           />
           <Select value={filterTipo} onValueChange={setFilterTipo}>
-            <SelectTrigger className="w-40 bg-white border-gray-300">
+            <SelectTrigger className="w-full sm:w-40 bg-gray-50 border-gray-300">
               <SelectValue placeholder="Filtrar por tipo" />
             </SelectTrigger>
             <SelectContent>
@@ -460,8 +460,15 @@ export default function Transacoes() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransacoes.map((transacao) => (
-                <TableRow key={transacao.id}>
+              {filteredTransacoes.map((transacao, idx) => (
+                <TableRow
+                  key={transacao.id}
+                  className={
+                    idx % 2 === 0
+                      ? "bg-white hover:bg-blue-50 transition-colors"
+                      : "bg-gray-50 hover:bg-blue-50 transition-colors"
+                  }
+                >
                   <TableCell className="font-medium">
                     {transacao.ticker}
                   </TableCell>
@@ -677,13 +684,13 @@ export default function Transacoes() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Transações</h1>
-        <div className="flex gap-2">
+    <div className="container mx-auto p-4 max-w-6xl">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h1 className="text-3xl font-bold text-blue-900 tracking-tight">Transações</h1>
+        <div className="flex gap-2 items-center">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => resetForm()}>
+              <Button onClick={() => resetForm()} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md">
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Transação
               </Button>
@@ -875,18 +882,22 @@ export default function Transacoes() {
         </div>
       </div>
 
-      <Tabs defaultValue="acoes" className="w-full">
-        <TabsList>
-          <TabsTrigger value="acoes">Ações</TabsTrigger>
-          <TabsTrigger value="fiis">FIIs</TabsTrigger>
-        </TabsList>
-        <TabsContent value="acoes">
-          <TabelaTransacoes transacoes={transacoesAcoes} tipo="acao" />
-        </TabsContent>
-        <TabsContent value="fiis">
-          <TabelaTransacoes transacoes={transacoesFiis} tipo="fii" />
-        </TabsContent>
-      </Tabs>
+      <Card className="shadow-lg border border-gray-200">
+        <CardHeader className="bg-gray-50 border-b border-gray-200 rounded-t-md">
+          <Tabs defaultValue="acoes" className="w-full">
+            <TabsList className="bg-transparent">
+              <TabsTrigger value="acoes" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">Ações</TabsTrigger>
+              <TabsTrigger value="fiis" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">FIIs</TabsTrigger>
+            </TabsList>
+            <TabsContent value="acoes">
+              <TabelaTransacoes transacoes={transacoesAcoes} tipo="acao" />
+            </TabsContent>
+            <TabsContent value="fiis">
+              <TabelaTransacoes transacoes={transacoesFiis} tipo="fii" />
+            </TabsContent>
+          </Tabs>
+        </CardHeader>
+      </Card>
     </div>
   );
 }
