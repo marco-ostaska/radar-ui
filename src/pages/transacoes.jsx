@@ -84,6 +84,8 @@ export default function Transacoes() {
 
   // Estado de ordenação global
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  // Filtro por tipo global
+  const [filterTipo, setFilterTipo] = useState("ALL");
 
   useEffect(() => {
     loadTransacoes();
@@ -283,10 +285,15 @@ export default function Transacoes() {
 
   const TabelaTransacoes = ({ transacoes, tipo }) => {
     const [search, setSearch] = useState("");
-    // Ordenação e filtro
+    // Ordenação, filtro por ticker e tipo
     const filteredTransacoes = [...transacoes]
       .filter((transacao) =>
         transacao.ticker.toLowerCase().includes(search.toLowerCase())
+      )
+      .filter((transacao) =>
+        filterTipo !== "ALL"
+          ? (transacao.tipo || "").toUpperCase() === filterTipo
+          : true
       )
       .sort((a, b) => {
         if (!sortConfig.key) return 0;
@@ -317,13 +324,25 @@ export default function Transacoes() {
 
     return (
       <div>
-        <div className="mb-2 flex justify-end">
+        <div className="mb-2 flex justify-between gap-2 items-center">
           <Input
             placeholder="Buscar ativo..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-64"
           />
+          <Select value={filterTipo} onValueChange={setFilterTipo}>
+            <SelectTrigger className="w-40 bg-white border-gray-300">
+              <SelectValue placeholder="Filtrar por tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos</SelectItem>
+              <SelectItem value="COMPRA">Compra</SelectItem>
+              <SelectItem value="VENDA">Venda</SelectItem>
+              <SelectItem value="DESDOBRAMENTO">Desdobramento</SelectItem>
+              <SelectItem value="AGRUPAMENTO">Agrupamento</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="rounded-md border">
           <Table>
