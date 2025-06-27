@@ -40,7 +40,11 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CarteiraFiisPage() {
-  const [notaDialog, setNotaDialog] = useState({ open: false, ticker: null, nota: 0 });
+  const [notaDialog, setNotaDialog] = useState({
+    open: false,
+    ticker: null,
+    nota: 0,
+  });
   const [totals, setTotals] = useState({
     totalInvestido: 0,
     totalSaldo: 0,
@@ -50,8 +54,8 @@ export default function CarteiraFiisPage() {
     totalRendimentosMensais: 0,
   });
   const [carteiraFiis, setCarteiraFiis] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [searchTicker, setSearchTicker] = useState("");
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -67,48 +71,29 @@ export default function CarteiraFiisPage() {
     loadCarteira();
   }, []);
 
-  useEffect(() => {
-    setCarteiraFiis((prev) => sortData(prev, sortConfig.key, sortConfig.direction));
-  }, [sortConfig]);
-
-  const sortData = (data, key, direction) => {
-    if (!key) return data;
-    return [...data].sort((a, b) => {
-      const aValue = key === "variacao" ? a[key] || 0 : a[key];
-      const bValue = key === "variacao" ? b[key] || 0 : b[key];
-      if (aValue < bValue) return direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  };
-
   const loadCarteira = async () => {
     try {
-      setLoading(true);
       const fiis = await fetchCarteiraFiis();
-      setCarteiraFiis(sortData(fiis, sortConfig.key, sortConfig.direction));
+      setCarteiraFiis(fiis);
       // Calculate totals
-      const totalInvestido = fiis.reduce((sum, fii) => sum + fii.valor_investido, 0);
+      const totalInvestido = fiis.reduce(
+        (sum, fii) => sum + fii.valor_investido,
+        0
+      );
       const totalSaldo = fiis.reduce((sum, fii) => sum + fii.saldo, 0);
       const totalVariacao = totalSaldo - totalInvestido;
       const totalQuantidade = fiis.length; // Count of unique assets
-      const totalVariacaoPercent = totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
+      const totalVariacaoPercent =
+        totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
       const totalRendimentosMensais = fiis.reduce((sum, fii) => {
         const rendimento = parseFloat(fii?.rendimento_mensal_estimado || 0);
         return sum + (isNaN(rendimento) ? 0 : rendimento);
       }, 0);
 
-      const dyOnCost = totalInvestido > 0 ? (totalRendimentosMensais / totalInvestido) * 100 : 0;
-
-      setTotals({
-        totalInvestido,
-        totalSaldo,
-        totalVariacao,
-        totalQuantidade,
-        totalVariacaoPercent,
-        totalRendimentosMensais,
-        dyOnCost,
-      });
+      const dyOnCost =
+        totalInvestido > 0
+          ? (totalRendimentosMensais / totalInvestido) * 100
+          : 0;
 
       setTotals({
         totalInvestido,
@@ -121,8 +106,6 @@ export default function CarteiraFiisPage() {
       });
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -161,6 +144,28 @@ export default function CarteiraFiisPage() {
     }
   };
 
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      const direction =
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc";
+      setCarteiraFiis((prevFiis) => {
+        const sorted = [...prevFiis].sort((a, b) => {
+          let aValue = a[key];
+          let bValue = b[key];
+          if (typeof aValue === "string" && typeof bValue === "string") {
+            aValue = aValue.toLowerCase();
+            bValue = bValue.toLowerCase();
+          }
+          if (aValue < bValue) return direction === "asc" ? -1 : 1;
+          if (aValue > bValue) return direction === "asc" ? 1 : -1;
+          return 0;
+        });
+        return sorted;
+      });
+      return { key, direction };
+    });
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -176,7 +181,6 @@ export default function CarteiraFiisPage() {
     }).format(value / 100);
   };
 
-  if (loading) return <div className="p-4">Carregando carteira de FIIs...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
   const getRecomendacaoColor = (recomendacao) => {
@@ -196,42 +200,65 @@ export default function CarteiraFiisPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumo da Carteira</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          Resumo da Carteira
+        </h2>
         <div className="grid grid-cols-2 gap-6">
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Total Investido</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Total Investido</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalInvestido)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Saldo Total</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalSaldo)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalSaldo)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Variação Total</span>
-            <span className={totals.totalVariacao >= 0 ? "text-lg font-bold text-green-600" : "text-lg font-bold text-red-600"}>
-              {formatCurrency(totals.totalVariacao)} ({formatPercent(totals.totalVariacaoPercent)})
+            <span
+              className={
+                totals.totalVariacao >= 0
+                  ? "text-lg font-bold text-green-600"
+                  : "text-lg font-bold text-red-600"
+              }
+            >
+              {formatCurrency(totals.totalVariacao)} (
+              {formatPercent(totals.totalVariacaoPercent)})
             </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">DY on Cost</span>
-            <span className="text-lg font-bold text-gray-900">{formatPercent(totals.dyOnCost)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatPercent(totals.dyOnCost)}
+            </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Rendimentos Mensais Estimados</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalRendimentosMensais)}</span>
+            <span className="text-sm text-gray-500">
+              Rendimentos Mensais Estimados
+            </span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalRendimentosMensais)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Quantidade de Ativos</span>
-            <span className="text-lg font-bold text-gray-900">{totals.totalQuantidade}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {totals.totalQuantidade}
+            </span>
           </div>
         </div>
       </div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Carteira de FIIs</h1>
+      {/* Campo de busca e botão adicionar - abaixo do resumo */}
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <Input
+          placeholder="Buscar por ticker..."
+          value={searchTicker}
+          onChange={(e) => setSearchTicker(e.target.value)}
+          className="w-64 border-gray-300"
+        />
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => resetForm()}>
@@ -381,24 +408,14 @@ export default function CarteiraFiisPage() {
             <TableRow>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "ticker",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("ticker")}
                 >
                   Ticker <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "quantidade",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("quantidade")}
                 >
                   Qtd <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
@@ -407,60 +424,35 @@ export default function CarteiraFiisPage() {
               <TableHead>Preço Atual</TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "variacao",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("variacao")}
                 >
                   Variação <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "valor_investido",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("valor_investido")}
                 >
                   Valor Investido <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "saldo",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("saldo")}
                 >
                   Saldo <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "rendimento_mensal_estimado",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("rendimento_mensal_estimado")}
                 >
                   Rendimento Mensal <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "dy",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("dy")}
                 >
                   DY <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
@@ -468,72 +460,42 @@ export default function CarteiraFiisPage() {
               <TableHead>P/VP</TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "nota",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("nota")}
                 >
                   Nota <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "porcentagem_carteira",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("porcentagem_carteira")}
                 >
                   % Carteira <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "porcentagem_ideal",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("porcentagem_ideal")}
                 >
                   % Ideal <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "valor_aportar",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("valor_aportar")}
                 >
                   Valor Aportar <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "aportar",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("aportar")}
                 >
                   Aportar <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() =>
-                    setSortConfig((prev) => ({
-                      key: "recomendacao",
-                      direction: prev.direction === "asc" ? "desc" : "asc",
-                    }))
-                  }
+                  onClick={() => handleSort("recomendacao")}
                 >
                   Recomendação <ArrowUpDown className="h-4 w-4 inline" />
                 </button>
@@ -541,8 +503,17 @@ export default function CarteiraFiisPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {carteiraFiis.map((fii) => (
-              <TableRow key={fii.ticker}>
+            {carteiraFiis.filter((fii) =>
+              fii.ticker.toLowerCase().includes(searchTicker.toLowerCase())
+            ).map((fii, idx) => (
+              <TableRow
+                key={fii.ticker}
+                className={
+                  idx % 2 === 0
+                    ? "bg-white border-b border-gray-100"
+                    : "bg-gray-50 border-b border-gray-100"
+                }
+              >
                 <TableCell className="font-medium">{fii.ticker}</TableCell>
                 <TableCell>{fii.quantidade}</TableCell>
                 <TableCell>{formatCurrency(fii.preco_medio)}</TableCell>
@@ -583,8 +554,16 @@ export default function CarteiraFiisPage() {
                     {fii.nota != null ? fii.nota : 0}
                   </Button>
                 </TableCell>
-                <TableCell>{fii.porcentagem_carteira != null ? `${fii.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
-                <TableCell>{fii.porcentagem_ideal != null ? `${fii.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
+                <TableCell>
+                  {fii.porcentagem_carteira != null
+                    ? `${fii.porcentagem_carteira.toFixed(2)}%`
+                    : "0.00%"}
+                </TableCell>
+                <TableCell>
+                  {fii.porcentagem_ideal != null
+                    ? `${fii.porcentagem_ideal.toFixed(2)}%`
+                    : "0.00%"}
+                </TableCell>
                 <TableCell
                   className={
                     fii.valor_aportar > 0
@@ -594,7 +573,9 @@ export default function CarteiraFiisPage() {
                       : ""
                   }
                 >
-                  {fii.valor_aportar != null ? formatCurrency(fii.valor_aportar) : formatCurrency(0)}
+                  {fii.valor_aportar != null
+                    ? formatCurrency(fii.valor_aportar)
+                    : formatCurrency(0)}
                 </TableCell>
                 <TableCell
                   className={
@@ -616,13 +597,20 @@ export default function CarteiraFiisPage() {
         </Table>
       </div>
       {/* Dialog para editar nota */}
-      <Dialog open={notaDialog?.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+      <Dialog
+        open={notaDialog?.open}
+        onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}
+      >
         <DialogContent className="bg-white rounded-xl shadow-2xl p-8 max-w-sm mx-auto flex flex-col items-center gap-6">
           <DialogHeader>
-            <DialogTitle className="text-center text-lg font-bold mb-2">Editar Nota</DialogTitle>
+            <DialogTitle className="text-center text-lg font-bold mb-2">
+              Editar Nota
+            </DialogTitle>
           </DialogHeader>
           <div className="w-full flex flex-col items-center gap-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nota (0 a 100)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nota (0 a 100)
+            </label>
             <Input
               type="number"
               min={0}

@@ -47,144 +47,219 @@ function TabelaCategoria({ data, totalAtivos, indiceBase }) {
     }
   };
 
-  const columns = React.useMemo(() => [
-    {
-      accessorKey: "ticker",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Ativo <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => row.getValue("ticker")
-    },
-    {
-      accessorKey: "cotacao",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Cotação <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => `R$ ${row.getValue("cotacao")?.toFixed(2)}`
-    },
-    {
-      accessorKey: "vpa",
-      header: "Valor Patrimonial",
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("vpa"), row.getValue("cotacao"))}>
-          R$ {row.getValue("vpa")?.toFixed(2)}
-        </div>
-      )
-    },
-    {
-      accessorKey: "teto_div",
-      header: "Valor Teto por DY",
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("teto_div"), row.getValue("cotacao"))}>
-          R$ {row.getValue("teto_div")?.toFixed(2)}
-        </div>
-      )
-    },
-    {
-      accessorKey: "dy_estimado",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          DY <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("dy_estimado"), indiceBase)}>
-          {row.getValue("dy_estimado")}%</div>
-      )
-    },
-    {
-      accessorKey: "rendimento_real",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Rendimento Real <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("rendimento_real"), indiceBase)}>
-          {row.getValue("rendimento_real")}%</div>
-      )
-    },
-    {
-      accessorKey: "potencial",
-      header: "Potencial",
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("potencial"), 0)}>
-          {row.getValue("potencial")}%</div>
-      )
-    },
-    {
-      accessorKey: "nota_risco",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Nota Risco <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("nota_risco"), 5)}>
-          {row.getValue("nota_risco")}
-        </div>
-      )
-    },
-    {
-      accessorKey: "score",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Score <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className={setTextColor(row.getValue("score"), 5)}>
-          {row.getValue("score")}
-        </div>
-      )
-    },
-    {
-      accessorKey: "comprar",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Comprar <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const comprar = row.getValue("comprar");
-        return <span className={comprar ? "text-green-600" : "text-red-500"}>{comprar ? "Sim" : "-"}</span>;
-      },
-      sortingFn: (rowA, rowB, columnId) => {
-        const a = rowA.getValue(columnId) ? 1 : 0;
-        const b = rowB.getValue(columnId) ? 1 : 0;
-        return a - b;
-      }
-    },
-    {
-      accessorKey: "forceUpdate",
-      header: "Force Update",
-      cell: ({ row }) => (
-        <Button
-          onClick={() => handleForceUpdate(row.getValue("ticker"))}
-          className="hover:text-blue-500 active:text-gray-500"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+  const columns = React.useMemo(
+    () => [
+      {
+        accessorKey: "ticker",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
-          </svg>
-        </Button>
-      )
-    }
-  ], [indiceBase]);
+            Ativo <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => row.getValue("ticker"),
+      },
+      {
+        accessorKey: "cotacao",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Cotação <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => `R$ ${row.getValue("cotacao")?.toFixed(2)}`,
+      },
+      {
+        accessorKey: "vpa",
+        header: "Valor Patrimonial",
+        cell: ({ row }) => (
+          <div
+            className={setTextColor(
+              row.getValue("vpa"),
+              row.getValue("cotacao")
+            )}
+          >
+            R$ {row.getValue("vpa")?.toFixed(2)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "teto_div",
+        header: "Valor Teto por DY",
+        cell: ({ row }) => (
+          <div
+            className={setTextColor(
+              row.getValue("teto_div"),
+              row.getValue("cotacao")
+            )}
+          >
+            R$ {row.getValue("teto_div")?.toFixed(2)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "dy_estimado",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            DY <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div
+            className={setTextColor(row.getValue("dy_estimado"), indiceBase)}
+          >
+            {row.getValue("dy_estimado")}%
+          </div>
+        ),
+      },
+      {
+        accessorKey: "rendimento_real",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rendimento Real <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div
+            className={setTextColor(
+              row.getValue("rendimento_real"),
+              indiceBase
+            )}
+          >
+            {row.getValue("rendimento_real")}%
+          </div>
+        ),
+      },
+      {
+        accessorKey: "potencial",
+        header: "Potencial",
+        cell: ({ row }) => (
+          <div className={setTextColor(row.getValue("potencial"), 0)}>
+            {row.getValue("potencial")}%
+          </div>
+        ),
+      },
+      {
+        accessorKey: "nota_risco",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nota Risco <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div className={setTextColor(row.getValue("nota_risco"), 5)}>
+            {row.getValue("nota_risco")}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "score",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Score <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div className={setTextColor(row.getValue("score"), 5)}>
+            {row.getValue("score")}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "nota_media",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nota Média <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const notaRisco = Number(row.getValue("nota_risco"));
+          const score = Number(row.getValue("score"));
+          if (isNaN(notaRisco) || isNaN(score)) return "-";
+          const media = ((notaRisco + score) / 2).toFixed(2);
+          return <div className={setTextColor(media, 5)}>{media}</div>;
+        },
+        sortingFn: (rowA, rowB) => {
+          const a = Number(rowA.getValue("nota_risco"));
+          const b = Number(rowB.getValue("nota_risco"));
+          const a2 = Number(rowA.getValue("score"));
+          const b2 = Number(rowB.getValue("score"));
+          const mediaA = isNaN(a) || isNaN(a2) ? -Infinity : (a + a2) / 2;
+          const mediaB = isNaN(b) || isNaN(b2) ? -Infinity : (b + b2) / 2;
+          return mediaA - mediaB;
+        },
+      },
+      {
+        accessorKey: "comprar",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Comprar <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const comprar = row.getValue("comprar");
+          return (
+            <span className={comprar ? "text-green-600" : "text-red-500"}>
+              {comprar ? "Sim" : "-"}
+            </span>
+          );
+        },
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) ? 1 : 0;
+          const b = rowB.getValue(columnId) ? 1 : 0;
+          return a - b;
+        },
+      },
+      {
+        accessorKey: "forceUpdate",
+        header: "Force Update",
+        cell: ({ row }) => (
+          <Button
+            onClick={() => handleForceUpdate(row.getValue("ticker"))}
+            className="hover:text-blue-500 active:text-gray-500"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0114.36-4.36L23 10M1 14l5.64 5.36A9 9 0 0020.49 15"></path>
+            </svg>
+          </Button>
+        ),
+      },
+    ],
+    [indiceBase]
+  );
 
   const table = useReactTable({
     data,

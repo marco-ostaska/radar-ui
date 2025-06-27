@@ -60,7 +60,12 @@ export default function CarteiraAcoesPage() {
     ativoTipo: "acao",
   });
 
-  const [notaDialog, setNotaDialog] = useState({ open: false, ticker: null, nota: 0 });
+  const [notaDialog, setNotaDialog] = useState({
+    open: false,
+    ticker: null,
+    nota: 0,
+  });
+  const [searchTicker, setSearchTicker] = useState("");
 
   useEffect(() => {
     loadCarteira();
@@ -73,11 +78,15 @@ export default function CarteiraAcoesPage() {
       setCarteiraAcoes(acoes);
 
       // Calculate totals
-      const totalInvestido = acoes.reduce((sum, acao) => sum + acao.valor_investido, 0);
+      const totalInvestido = acoes.reduce(
+        (sum, acao) => sum + acao.valor_investido,
+        0
+      );
       const totalSaldo = acoes.reduce((sum, acao) => sum + acao.saldo, 0);
       const totalVariacao = totalSaldo - totalInvestido;
       const totalQuantidade = acoes.length; // Count of unique assets
-      const totalVariacaoPercent = totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
+      const totalVariacaoPercent =
+        totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
 
       setTotals({
         totalInvestido,
@@ -143,7 +152,8 @@ export default function CarteiraAcoesPage() {
     }).format(value / 100);
   };
 
-  if (loading) return <div className="p-4">Carregando carteira de ações...</div>;
+  if (loading)
+    return <div className="p-4">Carregando carteira de ações...</div>;
   if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
   const getRecomendacaoColor = (recomendacao) => {
@@ -161,7 +171,8 @@ export default function CarteiraAcoesPage() {
 
   const handleSort = (key) => {
     setSortConfig((prev) => {
-      const direction = prev.key === key && prev.direction === "asc" ? "desc" : "asc";
+      const direction =
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc";
       return { key, direction };
     });
     setCarteiraAcoes((prev) =>
@@ -173,159 +184,203 @@ export default function CarteiraAcoesPage() {
     );
   };
 
+  // Filtra acoes pelo ticker digitado
+  const filteredAcoes = carteiraAcoes.filter((acao) =>
+    acao.ticker.toLowerCase().includes(searchTicker.toLowerCase())
+  );
+
   return (
     <div className="container mx-auto p-4">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumo da Carteira</h2>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Total Investido</span>
-              <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Saldo Total</span>
-              <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalSaldo)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Variação Total</span>
-              <span className={totals.totalVariacao >= 0 ? "text-lg font-bold text-green-600" : "text-lg font-bold text-red-600"}>
-                {formatCurrency(totals.totalVariacao)} ({formatPercent(totals.totalVariacaoPercent)})
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Quantidade de Ativos</span>
-              <span className="text-lg font-bold text-gray-900">{totals.totalQuantidade}</span>
-            </div>
+      {/* Resumo da Carteira */}
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          Resumo da Carteira
+        </h2>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Total Investido</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalInvestido)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Saldo Total</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalSaldo)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Variação Total</span>
+            <span
+              className={
+                totals.totalVariacao >= 0
+                  ? "text-lg font-bold text-green-600"
+                  : "text-lg font-bold text-red-600"
+              }
+            >
+              {formatCurrency(totals.totalVariacao)} (
+              {formatPercent(totals.totalVariacaoPercent)})
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Quantidade de Ativos</span>
+            <span className="text-lg font-bold text-gray-900">
+              {totals.totalQuantidade}
+            </span>
           </div>
         </div>
-      <h1 className="text-2xl font-bold mb-4">Carteira de Ações</h1>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button onClick={() => resetForm()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Ação
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle>Nova Transação</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 bg-white">
-            <div className="bg-white">
-              <label className="text-sm font-medium text-gray-700">Ticker</label>
-              <Input
-                name="ticker"
-                value={formData.ticker}
-                onChange={handleInputChange}
-                required
-                className="bg-white border-gray-300"
-              />
-            </div>
+      </div>
+      {/* Campo de busca e botão adicionar - AGORA ABAIXO DO RESUMO */}
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <Input
+          placeholder="Buscar por ticker..."
+          value={searchTicker}
+          onChange={(e) => setSearchTicker(e.target.value)}
+          className="w-64 border-gray-300"
+        />
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => resetForm()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Ação
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white">
+            <DialogHeader>
+              <DialogTitle>Nova Transação</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 bg-white">
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Ticker
+                </label>
+                <Input
+                  name="ticker"
+                  value={formData.ticker}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white border-gray-300"
+                />
+              </div>
 
-            <div className="bg-white">
-              <label className="text-sm font-medium text-gray-700">Data</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal bg-white border-gray-300",
-                      !formData.data && "text-gray-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.data ? (
-                      format(
-                        new Date(formData.data.split("/").reverse().join("-")),
-                        "dd/MM/yyyy",
-                        {
-                          locale: ptBR,
-                        }
-                      )
-                    ) : (
-                      <span>Selecione uma data</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      formData.data
-                        ? new Date(formData.data.split("/").reverse().join("-"))
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (date) {
-                        setFormData((prev) => ({
-                          ...prev,
-                          data: format(date, "dd/MM/yyyy", { locale: ptBR }),
-                        }));
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Data
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-white border-gray-300",
+                        !formData.data && "text-gray-500"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data ? (
+                        format(
+                          new Date(
+                            formData.data.split("/").reverse().join("-")
+                          ),
+                          "dd/MM/yyyy",
+                          {
+                            locale: ptBR,
+                          }
+                        )
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        formData.data
+                          ? new Date(
+                              formData.data.split("/").reverse().join("-")
+                            )
+                          : undefined
                       }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                      onSelect={(date) => {
+                        if (date) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            data: format(date, "dd/MM/yyyy", { locale: ptBR }),
+                          }));
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-            <div className="bg-white">
-              <label className="text-sm font-medium text-gray-700">Tipo de Transação</label>
-              <Select
-                value={formData.tipo}
-                onValueChange={(value) => handleSelectChange("tipo", value)}
-              >
-                <SelectTrigger className="bg-white border-gray-300">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="COMPRA">Compra</SelectItem>
-                  <SelectItem value="VENDA">Venda</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Tipo de Transação
+                </label>
+                <Select
+                  value={formData.tipo}
+                  onValueChange={(value) => handleSelectChange("tipo", value)}
+                >
+                  <SelectTrigger className="bg-white border-gray-300">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="COMPRA">Compra</SelectItem>
+                    <SelectItem value="VENDA">Venda</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="bg-white">
-              <label className="text-sm font-medium text-gray-700">Preço</label>
-              <Input
-                name="preco"
-                type="number"
-                step="0.01"
-                value={formData.preco}
-                onChange={handleInputChange}
-                required
-                className="bg-white border-gray-300"
-              />
-            </div>
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Preço
+                </label>
+                <Input
+                  name="preco"
+                  type="number"
+                  step="0.01"
+                  value={formData.preco}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white border-gray-300"
+                />
+              </div>
 
-            <div className="bg-white">
-              <label className="text-sm font-medium text-gray-700">Quantidade</label>
-              <Input
-                name="quantidade"
-                type="number"
-                value={formData.quantidade}
-                onChange={handleInputChange}
-                required
-                className="bg-white border-gray-300"
-              />
-            </div>
+              <div className="bg-white">
+                <label className="text-sm font-medium text-gray-700">
+                  Quantidade
+                </label>
+                <Input
+                  name="quantidade"
+                  type="number"
+                  value={formData.quantidade}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white border-gray-300"
+                />
+              </div>
 
-            <div className="flex justify-end space-x-2 bg-white">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                className="border-gray-300"
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Adicionar
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <div className="flex justify-end space-x-2 bg-white">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="border-gray-300"
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  Adicionar
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <h1 className="text-2xl font-bold mb-4">Carteira de Ações</h1>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -390,8 +445,15 @@ export default function CarteiraAcoesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {carteiraAcoes.map((acao) => (
-              <TableRow key={acao.ticker}>
+            {filteredAcoes.map((acao, idx) => (
+              <TableRow
+                key={acao.ticker}
+                className={
+                  idx % 2 === 0
+                    ? "bg-white border-b border-gray-100"
+                    : "bg-gray-50 border-b border-gray-100"
+                }
+              >
                 <TableCell className="font-medium">{acao.ticker}</TableCell>
                 <TableCell>{acao.quantidade}</TableCell>
                 <TableCell>{formatCurrency(acao.preco_medio)}</TableCell>
@@ -420,8 +482,16 @@ export default function CarteiraAcoesPage() {
                     {acao.nota != null ? acao.nota : 0}
                   </Button>
                 </TableCell>
-                <TableCell>{acao.porcentagem_carteira != null ? `${acao.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
-                <TableCell>{acao.porcentagem_ideal != null ? `${acao.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
+                <TableCell>
+                  {acao.porcentagem_carteira != null
+                    ? `${acao.porcentagem_carteira.toFixed(2)}%`
+                    : "0.00%"}
+                </TableCell>
+                <TableCell>
+                  {acao.porcentagem_ideal != null
+                    ? `${acao.porcentagem_ideal.toFixed(2)}%`
+                    : "0.00%"}
+                </TableCell>
                 <TableCell
                   className={
                     acao.valor_aportar > 0
@@ -431,7 +501,9 @@ export default function CarteiraAcoesPage() {
                       : ""
                   }
                 >
-                  {acao.valor_aportar != null ? formatCurrency(acao.valor_aportar) : formatCurrency(0)}
+                  {acao.valor_aportar != null
+                    ? formatCurrency(acao.valor_aportar)
+                    : formatCurrency(0)}
                 </TableCell>
                 <TableCell
                   className={
@@ -452,15 +524,22 @@ export default function CarteiraAcoesPage() {
           </TableBody>
         </Table>
       </div>
-      
+
       {/* Dialog para editar nota */}
-      <Dialog open={notaDialog.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+      <Dialog
+        open={notaDialog.open}
+        onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}
+      >
         <DialogContent className="bg-white rounded-xl shadow-2xl p-8 max-w-sm mx-auto flex flex-col items-center gap-6">
           <DialogHeader>
-            <DialogTitle className="text-center text-lg font-bold mb-2">Editar Nota</DialogTitle>
+            <DialogTitle className="text-center text-lg font-bold mb-2">
+              Editar Nota
+            </DialogTitle>
           </DialogHeader>
           <div className="w-full flex flex-col items-center gap-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nota (0 a 100)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nota (0 a 100)
+            </label>
             <Input
               type="number"
               min={0}

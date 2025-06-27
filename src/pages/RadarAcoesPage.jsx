@@ -263,8 +263,42 @@ export default function RadarAcoes() {
         },
       },
       {
+        accessorKey: "nota_media",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nota Média <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const notaRisco = Number(row.getValue("nota_risco"));
+          const score = Number(row.getValue("score"));
+          if (isNaN(notaRisco) || isNaN(score)) return "-";
+          const media = ((notaRisco + score) / 2).toFixed(2);
+          return <div className={`${setTextColor(media, 5)}`}>{media}</div>;
+        },
+        sortingFn: (rowA, rowB) => {
+          const a = Number(rowA.getValue("nota_risco"));
+          const b = Number(rowB.getValue("nota_risco"));
+          const a2 = Number(rowA.getValue("score"));
+          const b2 = Number(rowB.getValue("score"));
+          const mediaA = isNaN(a) || isNaN(a2) ? -Infinity : (a + a2) / 2;
+          const mediaB = isNaN(b) || isNaN(b2) ? -Infinity : (b + b2) / 2;
+          return mediaA - mediaB;
+        },
+      },
+      {
         accessorKey: "comprar",
-        header: "Comprar",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Comprar <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
         cell: ({ row }) => {
           const comprar = row.getValue("comprar");
           return (
@@ -273,17 +307,26 @@ export default function RadarAcoes() {
             </div>
           );
         },
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.getValue("comprar") ? 1 : 0;
+          const b = rowB.getValue("comprar") ? 1 : 0;
+          return a - b;
+        },
       },
       {
         accessorKey: "forceUpdate",
         header: "Force Update",
         cell: ({ row }) => (
-<Button
-  onClick={() =>
-    handleForceUpdateSingle(row.getValue("ticker"), setIsUpdating, setData)
-  }
-  className="hover:text-blue-500 active:text-gray-500"
->
+          <Button
+            onClick={() =>
+              handleForceUpdateSingle(
+                row.getValue("ticker"),
+                setIsUpdating,
+                setData
+              )
+            }
+            className="hover:text-blue-500 active:text-gray-500"
+          >
             {isUpdating[row.getValue("ticker")] ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -295,7 +338,13 @@ export default function RadarAcoes() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
                 <path d="M4 12a8 8 0 018-8"></path>
               </svg>
             ) : (
