@@ -47,6 +47,7 @@ import {
   CalendarIcon,
   Layers,
   Divide,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   Popover,
@@ -80,6 +81,9 @@ export default function Transacoes() {
     quantidade: "",
   });
   const [open, setOpen] = useState(false);
+
+  // Estado de ordenação global
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   useEffect(() => {
     loadTransacoes();
@@ -279,9 +283,37 @@ export default function Transacoes() {
 
   const TabelaTransacoes = ({ transacoes, tipo }) => {
     const [search, setSearch] = useState("");
-    const filteredTransacoes = transacoes.filter((transacao) =>
-      transacao.ticker.toLowerCase().includes(search.toLowerCase())
-    );
+    // Ordenação e filtro
+    const filteredTransacoes = [...transacoes]
+      .filter((transacao) =>
+        transacao.ticker.toLowerCase().includes(search.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (!sortConfig.key) return 0;
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+        // Para data, converte para Date
+        if (sortConfig.key === "data") {
+          aValue = parseDateString(aValue)?.getTime() || 0;
+          bValue = parseDateString(bValue)?.getTime() || 0;
+        }
+        // Para tipo, compara string
+        if (typeof aValue === "string" && typeof bValue === "string") {
+          aValue = aValue.toLowerCase();
+          bValue = bValue.toLowerCase();
+        }
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+
+    const handleSort = (key) => {
+      setSortConfig((prev) => {
+        const direction =
+          prev.key === key && prev.direction === "asc" ? "desc" : "asc";
+        return { key, direction };
+      });
+    };
 
     return (
       <div>
@@ -297,12 +329,114 @@ export default function Transacoes() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Ticker</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Preço</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead>Valor Total</TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("ticker")}
+                    className="flex items-center gap-1"
+                  >
+                    Ticker
+                    {sortConfig.key === "ticker" && (
+                      <ArrowUpDown
+                        className={`h-3 w-3 inline ${
+                          sortConfig.direction === "asc" ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                    {sortConfig.key !== "ticker" && (
+                      <ArrowUpDown className="h-3 w-3 inline opacity-30" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("data")}
+                    className="flex items-center gap-1"
+                  >
+                    Data
+                    {sortConfig.key === "data" && (
+                      <ArrowUpDown
+                        className={`h-3 w-3 inline ${
+                          sortConfig.direction === "asc" ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                    {sortConfig.key !== "data" && (
+                      <ArrowUpDown className="h-3 w-3 inline opacity-30" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("tipo")}
+                    className="flex items-center gap-1"
+                  >
+                    Tipo
+                    {sortConfig.key === "tipo" && (
+                      <ArrowUpDown
+                        className={`h-3 w-3 inline ${
+                          sortConfig.direction === "asc" ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                    {sortConfig.key !== "tipo" && (
+                      <ArrowUpDown className="h-3 w-3 inline opacity-30" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("preco")}
+                    className="flex items-center gap-1"
+                  >
+                    Preço
+                    {sortConfig.key === "preco" && (
+                      <ArrowUpDown
+                        className={`h-3 w-3 inline ${
+                          sortConfig.direction === "asc" ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                    {sortConfig.key !== "preco" && (
+                      <ArrowUpDown className="h-3 w-3 inline opacity-30" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("quantidade")}
+                    className="flex items-center gap-1"
+                  >
+                    Quantidade
+                    {sortConfig.key === "quantidade" && (
+                      <ArrowUpDown
+                        className={`h-3 w-3 inline ${
+                          sortConfig.direction === "asc" ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                    {sortConfig.key !== "quantidade" && (
+                      <ArrowUpDown className="h-3 w-3 inline opacity-30" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("valor_total")}
+                    className="flex items-center gap-1"
+                  >
+                    Valor Total
+                    {sortConfig.key === "valor_total" && (
+                      <ArrowUpDown
+                        className={`h-3 w-3 inline ${
+                          sortConfig.direction === "asc" ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                    {sortConfig.key !== "valor_total" && (
+                      <ArrowUpDown className="h-3 w-3 inline opacity-30" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
