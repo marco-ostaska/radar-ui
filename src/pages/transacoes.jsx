@@ -102,11 +102,11 @@ export default function Transacoes() {
   const resetForm = () => {
     // Usar dia atual no formato dd/MM/yyyy
     const hoje = new Date();
-    const dia = String(hoje.getDate()).padStart(2, '0');
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
     const ano = hoje.getFullYear();
     const dataAtual = `${dia}/${mes}/${ano}`;
-    
+
     setFormData({
       tipoAtivo: "",
       ticker: "",
@@ -135,7 +135,7 @@ export default function Transacoes() {
         carteiraId: 1, // sempre camelCase para as funções da API
         data: formData.data, // A API espera o formato dd/MM/yyyy
       };
-      
+
       if (editingTransacao) {
         if (formData.tipoAtivo === "acao") {
           await atualizarTransacaoAcoes(editingTransacao.id, dataToSend);
@@ -196,25 +196,29 @@ export default function Transacoes() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    
+
     // Se já estiver em dd/MM/yyyy, retorna direto
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
       return dateString;
     }
-    
+
     // Se vier como yyyy-MM-dd, converte manualmente
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       const [ano, mes, dia] = dateString.split("-");
       return `${dia}/${mes}/${ano}`;
     }
-    
+
     // Se vier como string ISO (ex: 2025-06-20T00:00:00.000Z)
     if (/^\d{4}-\d{2}-\d{2}T/.test(dateString)) {
-      return dateString.substring(8, 10) + "/" + 
-             dateString.substring(5, 7) + "/" + 
-             dateString.substring(0, 4);
+      return (
+        dateString.substring(8, 10) +
+        "/" +
+        dateString.substring(5, 7) +
+        "/" +
+        dateString.substring(0, 4)
+      );
     }
-    
+
     // Outros formatos, retorna como está
     return dateString;
   };
@@ -262,7 +266,7 @@ export default function Transacoes() {
           <Input
             placeholder="Buscar ativo..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-64"
           />
         </div>
@@ -282,14 +286,18 @@ export default function Transacoes() {
             <TableBody>
               {filteredTransacoes.map((transacao) => (
                 <TableRow key={transacao.id}>
-                  <TableCell className="font-medium">{transacao.ticker}</TableCell>
+                  <TableCell className="font-medium">
+                    {transacao.ticker}
+                  </TableCell>
                   <TableCell>{formatDate(transacao.data)}</TableCell>
                   <TableCell>{transacao.tipo}</TableCell>
                   <TableCell>{formatCurrency(transacao.preco)}</TableCell>
                   <TableCell>{transacao.quantidade}</TableCell>
                   <TableCell>{formatCurrency(transacao.valor_total)}</TableCell>
                   <TableCell className="text-right">
-                    {!(["desdobramento", "agrupamento"].includes(transacao.tipo?.toLowerCase())) && (
+                    {!["desdobramento", "agrupamento"].includes(
+                      transacao.tipo?.toLowerCase()
+                    ) && (
                       <Button
                         variant="ghost"
                         size="icon"
