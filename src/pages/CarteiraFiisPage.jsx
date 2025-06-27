@@ -40,7 +40,11 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CarteiraFiisPage() {
-  const [notaDialog, setNotaDialog] = useState({ open: false, ticker: null, nota: 0 });
+  const [notaDialog, setNotaDialog] = useState({
+    open: false,
+    ticker: null,
+    nota: 0,
+  });
   const [totals, setTotals] = useState({
     totalInvestido: 0,
     totalSaldo: 0,
@@ -62,13 +66,16 @@ export default function CarteiraFiisPage() {
     data: format(new Date(), "dd/MM/yyyy"),
     ativoTipo: "fii",
   });
+  const [searchTicker, setSearchTicker] = useState("");
 
   useEffect(() => {
     loadCarteira();
   }, []);
 
   useEffect(() => {
-    setCarteiraFiis((prev) => sortData(prev, sortConfig.key, sortConfig.direction));
+    setCarteiraFiis((prev) =>
+      sortData(prev, sortConfig.key, sortConfig.direction)
+    );
   }, [sortConfig]);
 
   const sortData = (data, key, direction) => {
@@ -88,17 +95,24 @@ export default function CarteiraFiisPage() {
       const fiis = await fetchCarteiraFiis();
       setCarteiraFiis(sortData(fiis, sortConfig.key, sortConfig.direction));
       // Calculate totals
-      const totalInvestido = fiis.reduce((sum, fii) => sum + fii.valor_investido, 0);
+      const totalInvestido = fiis.reduce(
+        (sum, fii) => sum + fii.valor_investido,
+        0
+      );
       const totalSaldo = fiis.reduce((sum, fii) => sum + fii.saldo, 0);
       const totalVariacao = totalSaldo - totalInvestido;
       const totalQuantidade = fiis.length; // Count of unique assets
-      const totalVariacaoPercent = totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
+      const totalVariacaoPercent =
+        totalInvestido > 0 ? (totalVariacao / totalInvestido) * 100 : 0;
       const totalRendimentosMensais = fiis.reduce((sum, fii) => {
         const rendimento = parseFloat(fii?.rendimento_mensal_estimado || 0);
         return sum + (isNaN(rendimento) ? 0 : rendimento);
       }, 0);
 
-      const dyOnCost = totalInvestido > 0 ? (totalRendimentosMensais / totalInvestido) * 100 : 0;
+      const dyOnCost =
+        totalInvestido > 0
+          ? (totalRendimentosMensais / totalInvestido) * 100
+          : 0;
 
       setTotals({
         totalInvestido,
@@ -193,45 +207,79 @@ export default function CarteiraFiisPage() {
     }
   };
 
+  // Filtra fiis pelo ticker digitado
+  const filteredFiis = carteiraFiis.filter((fii) =>
+    fii.ticker.toLowerCase().includes(searchTicker.toLowerCase())
+  );
+
   return (
     <div className="container mx-auto p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumo da Carteira</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          Resumo da Carteira
+        </h2>
         <div className="grid grid-cols-2 gap-6">
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Total Investido</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalInvestido)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Total Investido</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalInvestido)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalInvestido)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Saldo Total</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalSaldo)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalSaldo)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Variação Total</span>
-            <span className={totals.totalVariacao >= 0 ? "text-lg font-bold text-green-600" : "text-lg font-bold text-red-600"}>
-              {formatCurrency(totals.totalVariacao)} ({formatPercent(totals.totalVariacaoPercent)})
+            <span
+              className={
+                totals.totalVariacao >= 0
+                  ? "text-lg font-bold text-green-600"
+                  : "text-lg font-bold text-red-600"
+              }
+            >
+              {formatCurrency(totals.totalVariacao)} (
+              {formatPercent(totals.totalVariacaoPercent)})
             </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">DY on Cost</span>
-            <span className="text-lg font-bold text-gray-900">{formatPercent(totals.dyOnCost)}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatPercent(totals.dyOnCost)}
+            </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Rendimentos Mensais Estimados</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(totals.totalRendimentosMensais)}</span>
+            <span className="text-sm text-gray-500">
+              Rendimentos Mensais Estimados
+            </span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatCurrency(totals.totalRendimentosMensais)}
+            </span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Quantidade de Ativos</span>
-            <span className="text-lg font-bold text-gray-900">{totals.totalQuantidade}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {totals.totalQuantidade}
+            </span>
           </div>
         </div>
       </div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Carteira de FIIs</h1>
+      {/* Campo de busca e botão adicionar - abaixo do resumo */}
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <Input
+          placeholder="Buscar por ticker..."
+          value={searchTicker}
+          onChange={(e) => setSearchTicker(e.target.value)}
+          className="w-64 border-gray-300"
+        />
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => resetForm()}>
@@ -541,7 +589,7 @@ export default function CarteiraFiisPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {carteiraFiis.map((fii) => (
+            {filteredFiis.map((fii) => (
               <TableRow key={fii.ticker}>
                 <TableCell className="font-medium">{fii.ticker}</TableCell>
                 <TableCell>{fii.quantidade}</TableCell>
@@ -583,8 +631,16 @@ export default function CarteiraFiisPage() {
                     {fii.nota != null ? fii.nota : 0}
                   </Button>
                 </TableCell>
-                <TableCell>{fii.porcentagem_carteira != null ? `${fii.porcentagem_carteira.toFixed(2)}%` : "0.00%"}</TableCell>
-                <TableCell>{fii.porcentagem_ideal != null ? `${fii.porcentagem_ideal.toFixed(2)}%` : "0.00%"}</TableCell>
+                <TableCell>
+                  {fii.porcentagem_carteira != null
+                    ? `${fii.porcentagem_carteira.toFixed(2)}%`
+                    : "0.00%"}
+                </TableCell>
+                <TableCell>
+                  {fii.porcentagem_ideal != null
+                    ? `${fii.porcentagem_ideal.toFixed(2)}%`
+                    : "0.00%"}
+                </TableCell>
                 <TableCell
                   className={
                     fii.valor_aportar > 0
@@ -594,7 +650,9 @@ export default function CarteiraFiisPage() {
                       : ""
                   }
                 >
-                  {fii.valor_aportar != null ? formatCurrency(fii.valor_aportar) : formatCurrency(0)}
+                  {fii.valor_aportar != null
+                    ? formatCurrency(fii.valor_aportar)
+                    : formatCurrency(0)}
                 </TableCell>
                 <TableCell
                   className={
@@ -616,13 +674,20 @@ export default function CarteiraFiisPage() {
         </Table>
       </div>
       {/* Dialog para editar nota */}
-      <Dialog open={notaDialog?.open} onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}>
+      <Dialog
+        open={notaDialog?.open}
+        onOpenChange={(open) => setNotaDialog((prev) => ({ ...prev, open }))}
+      >
         <DialogContent className="bg-white rounded-xl shadow-2xl p-8 max-w-sm mx-auto flex flex-col items-center gap-6">
           <DialogHeader>
-            <DialogTitle className="text-center text-lg font-bold mb-2">Editar Nota</DialogTitle>
+            <DialogTitle className="text-center text-lg font-bold mb-2">
+              Editar Nota
+            </DialogTitle>
           </DialogHeader>
           <div className="w-full flex flex-col items-center gap-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nota (0 a 100)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nota (0 a 100)
+            </label>
             <Input
               type="number"
               min={0}
