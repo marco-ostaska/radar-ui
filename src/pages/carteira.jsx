@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { fetchCarteira, fetchCarteiraFiis } from "@/api/carteira";
-import { ArrowUpDown } from "lucide-react";
+import { Arr                await fetch(
+                  `${API_URL}/carteira/acoes/nota?carteira_id=${carteiraId}&ticker=${encodeURIComponent(
+                    notaDialog.ticker
+                  )}&nota=${notaDialog.nota}`,
+                  { method: "PUT" }
+                );wn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -42,10 +47,13 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCarteira } from "@/contexts/CarteiraContext";
+import { SeletorCarteira } from "@/components/SeletorCarteira";
 
 const API_URL = import.meta.env.VITE_SERVER_HOST || "http://localhost:8000";
 
 export default function Carteira() {
+  const { carteiraId } = useCarteira();
   const [carteiraAcoes, setCarteiraAcoes] = useState([]);
   const [carteiraFiis, setCarteiraFiis] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,14 +76,14 @@ export default function Carteira() {
 
   useEffect(() => {
     loadCarteira();
-  }, []);
+  }, [carteiraId]);
 
   const loadCarteira = async () => {
     try {
       setLoading(true);
       const [acoes, fiis] = await Promise.all([
-        fetchCarteira(),
-        fetchCarteiraFiis(),
+        fetchCarteira(carteiraId),
+        fetchCarteiraFiis(carteiraId),
       ]);
       setCarteiraAcoes(acoes);
       setCarteiraFiis(fiis);
@@ -112,12 +120,12 @@ export default function Carteira() {
       if (formData.ativoTipo === "acao") {
         await adicionarTransacaoAcoes({
           ...formData,
-          carteiraId: 1,
+          carteiraId: carteiraId,
         });
       } else {
         await adicionarTransacaoFiis({
           ...formData,
-          carteiraId: 1,
+          carteiraId: carteiraId,
         });
       }
       setIsDialogOpen(false);
@@ -283,7 +291,7 @@ export default function Carteira() {
               className="bg-blue-600 hover:bg-blue-700"
               onClick={async () => {
                 await fetch(
-                  `${API_URL}/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/acoes/nota?carteira_id=${carteiraId}&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }
@@ -441,7 +449,7 @@ export default function Carteira() {
               className="bg-blue-600 hover:bg-blue-700"
               onClick={async () => {
                 await fetch(
-                  `${API_URL}/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/acoes/nota?carteira_id=${carteiraId}&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }

@@ -38,8 +38,11 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCarteira } from "@/contexts/CarteiraContext";
+import { SeletorCarteira } from "@/components/SeletorCarteira";
 
 export default function CarteiraFiisPage() {
+  const { carteiraId } = useCarteira();
   const [notaDialog, setNotaDialog] = useState({
     open: false,
     ticker: null,
@@ -69,11 +72,11 @@ export default function CarteiraFiisPage() {
 
   useEffect(() => {
     loadCarteira();
-  }, []);
+  }, [carteiraId]);
 
   const loadCarteira = async () => {
     try {
-      const fiis = await fetchCarteiraFiis();
+      const fiis = await fetchCarteiraFiis(carteiraId);
       setCarteiraFiis(fiis);
       // Calculate totals
       const totalInvestido = fiis.reduce(
@@ -134,7 +137,7 @@ export default function CarteiraFiisPage() {
     try {
       await adicionarTransacaoFiis({
         ...formData,
-        carteiraId: 1,
+        carteiraId: carteiraId,
       });
       setIsDialogOpen(false);
       resetForm();
@@ -199,6 +202,12 @@ export default function CarteiraFiisPage() {
 
   return (
     <div className="container mx-auto p-4">
+      {/* Cabeçalho com título e seletor de carteira */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Carteira de FIIs</h1>
+        <SeletorCarteira />
+      </div>
+      
       <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
           Resumo da Carteira
@@ -630,7 +639,7 @@ export default function CarteiraFiisPage() {
                 const API_URL =
                   import.meta.env.VITE_SERVER_HOST || "http://localhost:8000";
                 await fetch(
-                  `${API_URL}/carteira/fii/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/fii/nota?carteira_id=${carteiraId}&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }

@@ -38,8 +38,11 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCarteira } from "@/contexts/CarteiraContext";
+import { SeletorCarteira } from "@/components/SeletorCarteira";
 
 export default function CarteiraAcoesPage() {
+  const { carteiraId } = useCarteira();
   const [carteiraAcoes, setCarteiraAcoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totals, setTotals] = useState({
@@ -69,12 +72,12 @@ export default function CarteiraAcoesPage() {
 
   useEffect(() => {
     loadCarteira();
-  }, []);
+  }, [carteiraId]);
 
   const loadCarteira = async () => {
     try {
       setLoading(true);
-      const acoes = await fetchCarteira();
+      const acoes = await fetchCarteira(carteiraId);
       setCarteiraAcoes(acoes);
 
       // Calculate totals
@@ -127,7 +130,7 @@ export default function CarteiraAcoesPage() {
     try {
       await adicionarTransacaoAcoes({
         ...formData,
-        carteiraId: 1,
+        carteiraId: carteiraId,
       });
       setIsDialogOpen(false);
       resetForm();
@@ -191,6 +194,12 @@ export default function CarteiraAcoesPage() {
 
   return (
     <div className="container mx-auto p-4">
+      {/* Cabeçalho com título e seletor de carteira */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Carteira de Ações</h1>
+        <SeletorCarteira />
+      </div>
+      
       {/* Resumo da Carteira */}
       <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
@@ -559,7 +568,7 @@ export default function CarteiraAcoesPage() {
                 const API_URL =
                   import.meta.env.VITE_SERVER_HOST || "http://localhost:8000";
                 await fetch(
-                  `${API_URL}/carteira/acoes/nota?carteira_id=1&ticker=${encodeURIComponent(
+                  `${API_URL}/carteira/acoes/nota?carteira_id=${carteiraId}&ticker=${encodeURIComponent(
                     notaDialog.ticker
                   )}&nota=${notaDialog.nota}`,
                   { method: "POST" }

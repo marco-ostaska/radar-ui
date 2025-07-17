@@ -23,6 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useCarteira } from "@/contexts/CarteiraContext";
+import { SeletorCarteira } from "@/components/SeletorCarteira";
 import {
   fetchTransacoesAcoes,
   fetchTransacoesFiis,
@@ -66,6 +68,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 export default function Transacoes() {
+  const { carteiraId } = useCarteira();
   const [transacoesAcoes, setTransacoesAcoes] = useState([]);
   const [transacoesFiis, setTransacoesFiis] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,14 +92,14 @@ export default function Transacoes() {
 
   useEffect(() => {
     loadTransacoes();
-  }, []);
+  }, [carteiraId]);
 
   const loadTransacoes = async () => {
     try {
       setLoading(true);
       const [acoes, fiis] = await Promise.all([
-        fetchTransacoesAcoes(),
-        fetchTransacoesFiis(),
+        fetchTransacoesAcoes(carteiraId),
+        fetchTransacoesFiis(carteiraId),
       ]);
       setTransacoesAcoes(acoes);
       setTransacoesFiis(fiis);
@@ -149,7 +152,7 @@ export default function Transacoes() {
         tipo: formData.tipoTransacao
           ? formData.tipoTransacao.toUpperCase()
           : undefined,
-        carteiraId: 1, // sempre camelCase para as funções da API
+        carteiraId: carteiraId, // sempre camelCase para as funções da API
         data: formData.data, // A API espera o formato dd/MM/yyyy
       };
 
