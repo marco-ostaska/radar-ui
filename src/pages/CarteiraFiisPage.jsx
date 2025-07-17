@@ -43,6 +43,7 @@ import { SeletorCarteira } from "@/components/SeletorCarteira";
 
 export default function CarteiraFiisPage() {
   const { carteiraId } = useCarteira();
+  const [loading, setLoading] = useState(true);
   const [notaDialog, setNotaDialog] = useState({
     open: false,
     ticker: null,
@@ -76,6 +77,7 @@ export default function CarteiraFiisPage() {
 
   const loadCarteira = async () => {
     try {
+      setLoading(true);
       const fiis = await fetchCarteiraFiis(carteiraId);
       setCarteiraFiis(fiis);
       // Calculate totals
@@ -109,6 +111,8 @@ export default function CarteiraFiisPage() {
       });
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -199,6 +203,10 @@ export default function CarteiraFiisPage() {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (loading)
+    return <div className="p-4">Carregando carteira de FIIs...</div>;
+  if (error) return <div className="p-4 text-red-600">Erro: {error}</div>;
 
   return (
     <div className="container mx-auto p-4">
