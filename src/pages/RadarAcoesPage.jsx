@@ -39,18 +39,50 @@ function setTextColor(atributo, valor) {
   return "text-red-700";
 }
 
-function handleForceUpdateAll(data, setIsRefreshing) {
+function handleForceUpdateAll(data, setIsRefreshing, setData) {
+  // Store all tickers we need to update
+  const tickers = data.map(ativo => ativo.ticker);
+  
+  // Clear the current data and start fresh
+  setData([]);
   setIsRefreshing(true);
-  Promise.all(
-    data.map(async (ativo) => {
-      try {
-        await fetchRadarAcao(ativo.ticker, true);
-        console.log(`Force update completed for ${ativo.ticker}`);
-      } catch (err) {
-        console.error(`Error during force update for ${ativo.ticker}:`, err);
-      }
-    })
-  ).finally(() => setIsRefreshing(false));
+  
+  // Create an array to collect all the updated data
+  const updatedItems = [];
+  
+  // Process one ticker at a time to show progress
+  const processNextTicker = async (index) => {
+    if (index >= tickers.length) {
+      // All tickers processed
+      setData(updatedItems);
+      setIsRefreshing(false);
+      alert('Atualização concluída!');
+      return;
+    }
+    
+    try {
+      const ticker = tickers[index];
+      const updatedData = await fetchRadarAcao(ticker, true);
+      console.log(`Force update completed for ${ticker} (${index + 1}/${tickers.length})`);
+      
+      // Add to our collection of updated items
+      updatedItems.push(updatedData);
+      
+      // Update the data to show progress
+      setData([...updatedItems]);
+      
+      // Process the next ticker
+      processNextTicker(index + 1);
+    } catch (err) {
+      console.error(`Error during force update for ${tickers[index]}:`, err);
+      
+      // Continue with the next ticker even if there's an error
+      processNextTicker(index + 1);
+    }
+  };
+  
+  // Start the process with the first ticker
+  processNextTicker(0);
 }
 
 function handleForceUpdateSingle(ticker, setUpdating, setData) {
@@ -386,11 +418,11 @@ export default function RadarAcoes() {
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
         <div>
-          totalAtivosCarregados {data.length} de {totalAtivos} ativos.
-          <Progress value={(data.length / totalAtivos) * 100} />
+          Ativos Carregados: {data.length} de {totalAtivos} ativos
+          <Progress value={(data.length / (totalAtivos || 1)) * 100} />
         </div>
         <Button
-          onClick={() => handleForceUpdateAll(data, setIsRefreshing)}
+          onClick={() => handleForceUpdateAll(data, setIsRefreshing, setData)}
           className="hover:text-blue-500 active:text-gray-500"
         >
           {isRefreshing ? (
