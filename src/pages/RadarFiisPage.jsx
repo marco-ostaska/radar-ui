@@ -363,14 +363,26 @@ export default function RadarFiisPage() {
     if (!selectedCategory || !ativosPorCategoria[selectedCategory]) return;
 
     try {
+      // Clear existing data for the category
+      setDataPorCategoria(prev => ({
+        ...prev,
+        [selectedCategory]: []
+      }));
+      
+      // Fetch fresh data for each ticker
       for (const ticker of ativosPorCategoria[selectedCategory]) {
-        await fetchRadaFii(ticker, true);
+        const result = await fetchRadaFii(ticker, true);
+        setDataPorCategoria((prev) => ({
+          ...prev,
+          [selectedCategory]: [...(prev[selectedCategory] || []), result],
+        }));
       }
-      alert("Force update completed!");
+      alert("Atualização concluída!");
+    } catch (err) {
+      console.error("Erro durante a atualização:", err);
+      alert("Ocorreu um erro durante a atualização.");
     } finally {
       setIsRefreshing(false);
-      console.error("Error during force update:", err);
-      alert("An error occurred during the force update.");
     }
   };
 
