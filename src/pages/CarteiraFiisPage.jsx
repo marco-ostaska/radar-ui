@@ -62,6 +62,7 @@ export default function CarteiraFiisPage() {
   const [searchTicker, setSearchTicker] = useState("");
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     ticker: "",
     quantidade: "",
@@ -305,30 +306,26 @@ export default function CarteiraFiisPage() {
                 <label className="text-sm font-medium text-gray-700">
                   Data
                 </label>
-                <Popover>
+                <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal bg-white border-gray-300",
-                        !formData.data && "text-gray-500"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.data ? (
-                        format(
-                          new Date(
-                            formData.data.split("/").reverse().join("-")
-                          ),
-                          "dd/MM/yyyy",
-                          {
-                            locale: ptBR,
-                          }
-                        )
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                    </Button>
+                    <div className="relative w-full">
+                      <Input
+                        name="data"
+                        value={formData.data}
+                        onChange={handleInputChange}
+                        placeholder="dd/MM/yyyy"
+                        className="bg-white border-gray-300 pr-10 w-full"
+                        autoComplete="off"
+                      />
+                      <CalendarIcon
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                        onClick={() => setOpen((v) => !v)}
+                        size={18}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Abrir calendário"
+                      />
+                    </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
@@ -342,9 +339,19 @@ export default function CarteiraFiisPage() {
                       }
                       onSelect={(date) => {
                         if (date) {
+                          const userTimezoneDate = new Date(
+                            date.getFullYear(),
+                            date.getMonth(),
+                            date.getDate()
+                          );
+                          const formattedDate = format(
+                            userTimezoneDate,
+                            "dd/MM/yyyy",
+                            { locale: ptBR }
+                          );
                           setFormData((prev) => ({
                             ...prev,
-                            data: format(date, "dd/MM/yyyy", { locale: ptBR }),
+                            data: formattedDate,
                           }));
                         }
                       }}
