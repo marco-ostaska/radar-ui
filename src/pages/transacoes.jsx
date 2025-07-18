@@ -196,9 +196,9 @@ export default function Transacoes() {
     if (window.confirm("Tem certeza que deseja excluir esta transação?")) {
       try {
         if (tipo === "acao") {
-          await deletarTransacaoAcoes(id);
+          await deletarTransacaoAcoes(id, carteiraId);
         } else {
-          await deletarTransacaoFiis(id);
+          await deletarTransacaoFiis(id, carteiraId);
         }
         loadTransacoes();
       } catch (err) {
