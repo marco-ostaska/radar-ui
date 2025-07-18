@@ -510,6 +510,7 @@ export default function Transacoes() {
   };
 
   function AgrupamentoDesdobramentoDialog({ tipo, onSuccess }) {
+    const { carteiraId } = useCarteira();
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState({
       tipoAtivo: "acao",
@@ -532,13 +533,15 @@ export default function Transacoes() {
       setLoading(true);
       setError(null);
       try {
+        // Garantindo que a data esteja no formato dd/MM/yyyy para a API
+        const formattedDate = formatDateToDDMMYYYY(form.data);
+        
         const params = {
           ticker: form.ticker,
           proporcao_antes: form.proporcao_antes,
           proporcao_depois: form.proporcao_depois,
-          carteira_id: 1,
-          [isAgrupamento ? "data_agrupamento" : "data_desdobramento"]:
-            formatDateToDDMMYYYY(form.data),
+          carteira_id: carteiraId,
+          [isAgrupamento ? "data_agrupamento" : "data_desdobramento"]: formattedDate,
         };
         if (isAgrupamento) {
           if (form.tipoAtivo === "acao") {
